@@ -56,8 +56,11 @@ function katexify_display($txt) {
 /// does $math$ and $$math$$ first, then markdown, then \\(math\\) and \\[math\\]
 /// time consuming because of the katex calls, but only if there is math in the page (otherwise quite fast)
 function toHTML($md) {
-    $md = preg_replace_callback('/\$\$(.*?)\$\$/s', 'katexify_display', $md);
-    $md = preg_replace_callback('/\$(.*?)\$/s', 'katexify_inline', $md);
+    global $metadata;
+    if (!isset($metadata['disable-katex'])) {
+        $md = preg_replace_callback('/\$\$(.*?)\$\$/s', 'katexify_display', $md);
+        $md = preg_replace_callback('/\$(.*?)\$/s', 'katexify_inline', $md);
+    }
     $html = MarkdownExtra::defaultTransform($md);
     $matches = array();
     $html = preg_replace_callback('/\&#92;\[(.*?)\&#92;\]/s', 'katexify_display', $html);
