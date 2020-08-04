@@ -29,6 +29,9 @@ foreach(glob('questions/*.md') as $i=>$name) {
         continue;
     }
     $sobj = aparse($qobj, $user);
+    if ($sobj['unindexed']) {
+        continue;
+    }
     echo '<tr><td>';
     if ($sobj['may_view']) {
         echo '<a href="quiz.php?qid='.$name;

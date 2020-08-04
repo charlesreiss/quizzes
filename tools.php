@@ -103,6 +103,7 @@ function qparse($qid) {
             "comments"=>true,
             "keyless"=>false,
             "order"=>"shuffle",
+            "unindexed"=>false,
         );
         
         $fh = fopen($filename, 'rb');
@@ -381,6 +382,7 @@ function aparse($qobj, $sid) {
     $now = time();
     // view any open quiz, even if time's up
     $ans['may_view'] = in_array($sid, $metadata['staff']) || $qobj['open'] <= $now;
+    $ans['unindexed'] = $qobj['unindexed'];
     // view key of any non-keyless past-due quiz
     $ans['may_view_key'] = $qobj['due'] < $now && !$qobj['keyless'];
     $time_left = $qobj['seconds'];
