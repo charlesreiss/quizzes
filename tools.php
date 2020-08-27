@@ -634,7 +634,7 @@ $vulgar_fractions = array(
 function fractionOf($num) {
     global $vulgar_fractions;
     foreach($vulgar_fractions as $n=>$c) {
-        if ($n >= $num) return $c;
+        if ($num >= $n) return $c;
     }
     return ' ';
 }
