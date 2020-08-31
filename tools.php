@@ -722,14 +722,14 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
         
         echo '</ol>';
     } else if ($q['type'] == 'box') {
-        $subm = $disable ? "disabled='disabled'" : ($ajax ? "onchange='$postcall' onkeydown='pending($qnum)'" : '');
+        $subm = $disable ? "disabled='disabled'" : ($ajax ? "onchange='$postcall' onkeydown='pending($qnum)' onblur='$postcall'" : '');
 
         echo "<div class='tinput'><span>Answer:</span><textarea name='ans$qnum' $subm>";
         if (isset($replied['answer'][0])) echo htmlentities($replied['answer'][0]);
         echo "</textarea></div>";
         if ($hist) echo "Key: <tt>".htmlentities($q['key'][0]['text'])."</tt>";
     } else if ($q['type'] == 'text') {
-        $subm = $disable ? "disabled='disabled'" : ($ajax ? "onchange='$postcall' onkeydown='pending($qnum)'" : '');
+        $subm = $disable ? "disabled='disabled'" : ($ajax ? "onchange='$postcall' onkeydown='pending($qnum)' onblur='$postcall'" : '');
 
         echo "<div class='tinput'><span>Answer:</span><input type='text' name='ans$qnum' $subm";
         if (isset($replied['answer'][0])) echo " value='".htmlentities($replied['answer'][0])."'";
@@ -764,7 +764,7 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
 
     
     if ($comments && $ajax && (!$disable || isset($replied['comments']) && $replied['comments'])) {
-        echo "<div class='tinput'><span>Comments:</span><textarea id='comments$qnum' onchange='$postcall' onkeydown='pending($qnum)'";
+        echo "<div class='tinput'><span>Comments:</span><textarea id='comments$qnum' onchange='$postcall' onkeydown='pending($qnum)' onblur='$postcall'";
         if ($disable) echo " disabled='disabled'";
         echo ">";
         echo htmlentities($replied['comments']);
