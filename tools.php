@@ -156,7 +156,7 @@ function qparse($qid) {
                     $keys[] = array('text'=>trim(substr($line, 4)), 'points'=>1);
                 } else {
                     $kv = explode('):', $line, 2);
-                    $keys[] = array('text'=>trim(kv[1]), 'points'=>floatval(substr($kv[0],4)));
+                    $keys[] = array('text'=>trim($kv[1]), 'points'=>floatval(substr($kv[0],4)));
                 }
                 continue; 
             }
