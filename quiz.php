@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <?php 
-require_once "tools.php";
+require_once "tools-test.php";
 ?>
 <html>
 <head>
@@ -26,6 +26,7 @@ function postAns(name, num) {
     document.getElementById('q'+num).className = "question submitting";
     var ans = {
         'user':"<?php echo $user; ?>", 
+        'session_id':"<?php echo make_or_get_session($user, $_GET['qid'])?>",
         'quiz':name,
         'slug':document.getElementById("q"+num).getAttribute('slug'), 
         'answer':[]
@@ -54,7 +55,7 @@ function ajaxSend(data, num) {
     if (!("withCredentials" in xhr)) {
         return null;
     }
-    xhr.open("POST", "quiz_listener.php<?php
+    xhr.open("POST", "<?php echo listener_url() ?><?php
     if (isset($_GET['asuser'])) echo '?asuser='.$_GET['asuser'];
     ?>", true);
     xhr.withCredentials = true;

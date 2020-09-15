@@ -12,6 +12,51 @@ function beginsWith($haystack, $needle) {
     return 0 === strncasecmp($haystack, $needle, strlen($needle));
 }
 
+function session_file($username, $quiz_id) {
+    if (preg_match("/^[a-zA-Z0-9]+$/",  $username, $matches)) {
+        $filtered_username = $matches[0];
+    } else {
+        $filtered_username = "UNKNOWN";
+    }
+    if (preg_match("/^[-_a-zA-Z0-9]+$/",  $quiz_id, $matches)) {
+        $filtered_quiz_id = $matches[0];
+    } else {
+        $filtered_quiz_id = "UNKNOWN";
+    }
+    return "sessions/$filtered_quiz_id/$filtered_username";
+}
+
+function make_or_get_session($username, $quiz_id) {
+    $filename = session_file($username, $quiz_id);
+    if (file_exists($filename)) {
+        return file_get_contents($filename);
+    } else {
+        $session_id = bin2hex(random_bytes(32));
+        file_put_contents_recursive($filename, $session_id);
+        if (!file_exists($filename))
+            echo('FAILED TO CREATE');
+        return $session_id;
+    }
+}
+
+function check_session($username, $quiz_id, $session_id) {
+    $filename = session_file($username, $quiz_id);
+    if (file_exists($filename)) {
+        return file_get_contents($filename) == $session_id;
+    } else {
+        return FALSE;
+    }
+}
+
+function listener_url() {
+    global $metadata;
+    if (array_key_exists('quiz_listener', $metadata)) {
+        return $metadata['quiz_listener'];
+    } else {
+        return 'quiz_listener.php';
+    }
+}
+
 function file_put_contents_recursive($filename, $contents, $flags=0) {
     if (!is_dir(dirname($filename))) {
         umask(0);
@@ -589,7 +634,7 @@ $vulgar_fractions = array(
 function fractionOf($num) {
     global $vulgar_fractions;
     foreach($vulgar_fractions as $n=>$c) {
-        if ($n >= $num) return $c;
+        if ($num >= $n) return $c;
     }
     return ' ';
 }
@@ -677,14 +722,14 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
         
         echo '</ol>';
     } else if ($q['type'] == 'box') {
-        $subm = $disable ? "disabled='disabled'" : ($ajax ? "onchange='$postcall' onkeydown='pending($qnum)'" : '');
+        $subm = $disable ? "disabled='disabled'" : ($ajax ? "onchange='$postcall' onkeydown='pending($qnum)' onblur='$postcall'" : '');
 
         echo "<div class='tinput'><span>Answer:</span><textarea name='ans$qnum' $subm>";
         if (isset($replied['answer'][0])) echo htmlentities($replied['answer'][0]);
         echo "</textarea></div>";
         if ($hist) echo "Key: <tt>".htmlentities($q['key'][0]['text'])."</tt>";
     } else if ($q['type'] == 'text') {
-        $subm = $disable ? "disabled='disabled'" : ($ajax ? "onchange='$postcall' onkeydown='pending($qnum)'" : '');
+        $subm = $disable ? "disabled='disabled'" : ($ajax ? "onchange='$postcall' onkeydown='pending($qnum)' onblur='$postcall'" : '');
 
         echo "<div class='tinput'><span>Answer:</span><input type='text' name='ans$qnum' $subm";
         if (isset($replied['answer'][0])) echo " value='".htmlentities($replied['answer'][0])."'";
@@ -719,7 +764,7 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
 
     
     if ($comments && $ajax && (!$disable || isset($replied['comments']) && $replied['comments'])) {
-        echo "<div class='tinput'><span>Comments:</span><textarea id='comments$qnum' onchange='$postcall' onkeydown='pending($qnum)'";
+        echo "<div class='tinput'><span>Comments:</span><textarea id='comments$qnum' onchange='$postcall' onkeydown='pending($qnum)' onblur='$postcall'";
         if ($disable) echo " disabled='disabled'";
         echo ">";
         echo htmlentities($replied['comments']);
@@ -735,8 +780,6 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
 
     echo "</div>";
 }
-
-
 
 
 ?>
