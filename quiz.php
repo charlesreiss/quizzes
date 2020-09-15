@@ -87,7 +87,7 @@ function tick() {
     var clock = document.getElementById('clock');
     var remaining = due - Date.now();
     if (remaining < 0) {
-        clock.innerHTML = "Time is up; further changes will be ignored";
+        clock.innerHTML = "Time is up";
         clearInterval(timer);
     } else {
         remaining /= 1000; remaining = Math.floor(remaining); // milliseconds -> seconds;
