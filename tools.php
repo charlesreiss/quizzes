@@ -443,6 +443,7 @@ function aparse($qobj, $sid) {
     }
     $ans['time_left'] = $time_left;
     $ans['may_submit'] = $ans['may_view'] && !$ans['may_view_key'] && ($time_left >= 0 || $qobj['allow_late']);
+    $ans['hide_time'] = $qobj['allow_late'];
     $_aparse["$qobj[slug] $sid"] = $ans;
     return $ans;
 }

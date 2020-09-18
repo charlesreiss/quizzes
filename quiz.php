@@ -273,7 +273,7 @@ function showQuiz($qid, $blank = false) {
     
     if ($sobj['may_submit'] && !$sobj['started'])
         putLog("$qid/$user.log", '{"date":"'.date('Y-m-d H:i:s').'"}'."\n");
-    if ($sobj['may_submit'])
+    if ($sobj['may_submit'] && !$sobj['hide_time'])
         echo "<div id='clock'>$sobj[time_left]</div>";
 
     $hist = (!$blank && $sobj['may_view_key']) ? histogram($qobj) : false;
