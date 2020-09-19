@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <?php 
-require_once "tools-test.php";
+require_once "tools.php";
 ?>
 <html>
 <head>
