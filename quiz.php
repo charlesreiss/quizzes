@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <?php 
-require_once "tools-test.php";
+require_once "tools.php";
 ?>
 <html>
 <head>
@@ -87,7 +87,7 @@ function tick() {
     var clock = document.getElementById('clock');
     var remaining = due - Date.now();
     if (remaining < 0) {
-        clock.innerHTML = "Time is up; further changes will be ignored";
+        clock.innerHTML = "Time is up";
         clearInterval(timer);
     } else {
         remaining /= 1000; remaining = Math.floor(remaining); // milliseconds -> seconds;
@@ -273,7 +273,7 @@ function showQuiz($qid, $blank = false) {
     
     if ($sobj['may_submit'] && !$sobj['started'])
         putLog("$qid/$user.log", '{"date":"'.date('Y-m-d H:i:s').'"}'."\n");
-    if ($sobj['may_submit'])
+    if ($sobj['may_submit'] && !$qobj['allow_late'])
         echo "<div id='clock'>$sobj[time_left]</div>";
 
     $hist = (!$blank && $sobj['may_view_key']) ? histogram($qobj) : false;

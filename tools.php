@@ -149,6 +149,7 @@ function qparse($qid) {
             "keyless"=>false,
             "order"=>"shuffle",
             "unindexed"=>false,
+            "allow_late"=>false,
         );
         
         $fh = fopen($filename, 'rb');
@@ -201,7 +202,7 @@ function qparse($qid) {
                     $keys[] = array('text'=>trim(substr($line, 4)), 'points'=>1);
                 } else {
                     $kv = explode('):', $line, 2);
-                    $keys[] = array('text'=>trim(kv[1]), 'points'=>floatval(substr($kv[0],4)));
+                    $keys[] = array('text'=>trim($kv[1]), 'points'=>floatval(substr($kv[0],4)));
                 }
                 continue; 
             }
@@ -446,8 +447,8 @@ function aparse($qobj, $sid, $time_cutoff=FALSE) {
             $time_left = $qobj['due'] - $now;
     }
     $ans['time_left'] = $time_left;
-    $ans['may_submit'] = $ans['may_view'] && !$ans['may_view_key'] && $time_left >= 0;
-    
+    $ans['may_submit'] = $ans['may_view'] && !$ans['may_view_key'] && ($time_left >= 0 || $qobj['allow_late']);
+    $ans['hide_time'] = $qobj['allow_late'];
     $_aparse["$qobj[slug] $sid"] = $ans;
     return $ans;
 }
