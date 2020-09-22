@@ -380,7 +380,7 @@ function qparse($qid) {
 }
 
 $_aparse = array();
-function aparse($qobj, $sid) {
+function aparse($qobj, $sid, $time_cutoff=FALSE) {
     global $_aparse;
     if (is_array($sid)) return $sid;
     if (is_string($qobj)) $qobj = qparse($qobj);
@@ -400,6 +400,11 @@ function aparse($qobj, $sid) {
                 $ans[$slug]['grade'] = $obj['grade'];
                 $ans[$slug]['feedback'] = $obj['feedback'];
             } else { // student action
+                if ($time_cutoff !== FALSE) {
+                    if (isset($obj['date']) && strtotime($obj['date']) < $time_cutoff) {
+                        continue;
+                    }
+                }
                 if (isset($obj['answer'])) { // student answer
                     $show = array('answer'=>$obj['answer']);
                     if (isset($obj['comments']))
