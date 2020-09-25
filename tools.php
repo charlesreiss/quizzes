@@ -402,7 +402,7 @@ function aparse($qobj, $sid, $time_cutoff=FALSE) {
                 $ans[$slug]['feedback'] = $obj['feedback'];
             } else { // student action
                 if ($time_cutoff !== FALSE) {
-                    if (isset($obj['date']) && strtotime($obj['date']) < $time_cutoff) {
+                    if (isset($obj['date']) && strtotime($obj['date']) > $time_cutoff) {
                         continue;
                     }
                 }
