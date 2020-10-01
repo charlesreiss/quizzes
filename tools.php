@@ -245,6 +245,7 @@ function qparse($qid) {
                 $opt = array('text'=>$bit[1]);
                 $bit = $bit[0];
                 $opt['hide'] = ($bit[0] == 'x' || $bit[1] == 'x');
+                $opt['autocredit'] = ($bit[0] == 'Y' || $bit[1] == 'Y');
                 if ($q['type'] == 'radio') {
                     // *a. this gets full points
                     // h. this gets half points
@@ -510,15 +511,19 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
         if (isset($sobj[$slug]['answer'])) {
             $resp = $sobj[$slug]['answer'];
 //error_log(json_encode($resp));
-            foreach($q['options'] as $opt)
+            foreach($q['options'] as $opt) {
+                if (!$graded && $opt['autocredit'] && $opt['points'] > 0) {
+                    $earn += $opt['points'];
+                }
                 if (in_array($opt['slug'],$resp)) {
-                    if (!$graded) $earn += $opt['points'];
+                    if (!$graded && !$opt['autocredit']) $earn += $opt['points'];
                     if ($hist !== FALSE)
                         if (isset($hist[$slug][$opt['slug']]))
                             $hist[$slug][$opt['slug']] += 1;
                         else
                             $hist[$slug][$opt['slug']] = 1;
                 }
+            }
             if ($review !== FALSE && round($earn,6) != 1 
             && ($sobj[$slug]['comments']))
                 $review[$slug][] = $sobj['slug'];
