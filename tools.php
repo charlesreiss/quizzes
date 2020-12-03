@@ -66,6 +66,23 @@ function file_put_contents_recursive($filename, $contents, $flags=0) {
     chmod($filename, 0666);
 }
 
+function acquire_lock_for($base_filename) {
+    $lock_file = $base_filename . ".lock";
+    if (!is_dir(dirname($filename))) {
+        umask(0);
+        mkdir(dirname($filename), 0777, true);
+    }
+    $fp = fopen($lock_file, "a+");
+    if (!flock($fp, LOCK_EX)) {
+        die("Error acquiring lock");
+    }
+    return $fp;
+}
+
+function release_lock($fp) {
+    fclose($fp);
+}
+
 function katexify($txt, $display=false) {
     $cache_file = "cache/katex/".($display ? 'display' : 'inline')."/".sha1($txt).'.html';
     if (file_exists($cache_file))

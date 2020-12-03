@@ -8,6 +8,7 @@ if (!isset($data['kind'])) exit("invalid request:\n$raw\n".json_encode($data));
 
 if ($data['kind'] == 'reply') {
     $path = "log/$data[quiz]/adjustments_$data[slug].csv";
+    $lock_fp = acquire_lock_for($path);
     $fh = fopen($path, "a");
     fputcsv($fh, array($data['user'], $data['score'], $data['reply'], $user, date('Y-m-d H:i:s')));
     fclose($fh);
@@ -18,14 +19,17 @@ if ($data['kind'] == 'reply') {
     ))."\n");
     if (file_exists("log/$data[quiz]/hist.json"))
         unlink("log/$data[quiz]/hist.json"); // grades changed
+    release_lock($lock_fp);
 } else if ($data['kind'] == 'key') {
     $fname = "log/$data[quiz]/key_$data[slug].json";
+    $lock_fp = acquire_lock_for($fname);
     // race condition if multiple concurrent graders; maybe add file locking?
     $ext = array($data['key']=>$data['val']);
     if (file_exists($fname)) $ext += json_decode(file_get_contents($fname),true);
     file_put_contents_recursive($fname,json_encode($ext));
     if (file_exists("log/$data[quiz]/hist.json"))
         unlink("log/$data[quiz]/hist.json"); // grades changed
+    release_lock($lock_fp);
 } else {
     exit("unknown grader action kind \"$data[kind]\"");
 }
