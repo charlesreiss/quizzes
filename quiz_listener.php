@@ -7,7 +7,7 @@ if (isset($_GET['view_only'])) {
 }
 
 
-require_once "tools-test.php";
+require_once "tools.php";
 $cors_origin = $metadata['cors_origin'];
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {

@@ -534,11 +534,11 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
             $resp = $sobj[$slug]['answer'];
 //error_log(json_encode($resp));
             foreach($q['options'] as $opt) {
-                if (!$graded && $opt['autocredit'] && $opt['points'] > 0) {
+                if (!$graded && isset($opt['autocredit']) && $opt['autocredit'] && $opt['points'] > 0) {
                     $earn += $opt['points'];
                 }
                 if (in_array($opt['slug'],$resp)) {
-                    if (!$graded && !$opt['autocredit']) $earn += $opt['points'];
+                    if (!$graded && (!isset($opt['autocredit']) || !$opt['autocredit'])) $earn += $opt['points'];
                     if ($hist !== FALSE)
                         if (isset($hist[$slug][$opt['slug']]))
                             $hist[$slug][$opt['slug']] += 1;
