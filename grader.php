@@ -147,14 +147,26 @@ function show_random_comment($quizid, $q, $mq, $only_ungraded=TRUE) {
     $all_comments = get_comments($quizid, $q['slug']);
     $users = array_keys($all_comments);
     shuffle($users);
+
+    $found_one = false;
+    $which_user = NULL;
     
     foreach($users as $user) {
         $details = $all_comments[$user];
         if (!isset($details['feedback'])) {
             show_one_comment($quizid, $q, $mq, $qobj, $user, $details);
+            $found_one = true;
+            $which_user = $user;
             break;
         }
     }
+
+    if (!$found_one) {
+        echo("<p>No more to grade for this question.</p>");
+    } else {
+        echo("<p><input type='button' onclick='setComment(\"$which_user\"); location.href = location.href;' value='submit and next'><input type='button' onclick='location.href = location.href;' value='another random'></p>");
+    }
+
     ?><script>
         document.querySelectorAll('textarea').forEach(x => {
             x.style.height = 'auto';
@@ -285,6 +297,8 @@ if (isset($_GET['qid']) && !isset(($qobj = qparse($_GET['qid']))['error'])) {
             show_blanks($_GET['qid'], $questions[$_GET['slug']], $mqs[$_GET['slug']]);
         } else if ($_GET['kind'] == 'comment') {
             show_comments($_GET['qid'], $questions[$_GET['slug']], $mqs[$_GET['slug']]);
+        } else if ($_GET['kind'] == 'comment-random') {
+            show_random_comment($_GET['qid'], $questions[$_GET['slug']], $mqs[$_GET['slug']]);
         } else {
             echo "To do: show \"$_GET[kind]\" view for $qobj[slug] question $_GET[slug]\n";
         }
