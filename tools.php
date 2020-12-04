@@ -452,7 +452,7 @@ function aparse($qobj, $sid, $time_cutoff=FALSE) {
     // view any open quiz, even if time's up
     $ans['may_view'] = in_array($sid, $metadata['staff']) || $qobj['open'] <= $now;
     if (isset($metadata['open_'.$qobj['slug']][$sid])) {
-        $ans['may_view'] = strtotime($metadata['open_'$qobj]['slug'][$sid]) <= $now;
+        $ans['may_view'] = strtotime($metadata['open_'.$qobj]['slug'][$sid]) <= $now;
     }
     $ans['unindexed'] = $qobj['unindexed'];
     // view key of any non-keyless past-due quiz
