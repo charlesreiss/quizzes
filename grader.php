@@ -333,8 +333,8 @@ if (isset($_GET['qid']) && !isset(($qobj = qparse($_GET['qid']))['error'])) {
         foreach($rev as $slug=>$val) if (substr($slug,8) == '-answers') {
             $slug = substr($slug,0,8);
             echo "<tr><td>blank</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=blank'>$slug</a></td><td";
-            $of = count($val);
             $sheet = get_blanks($qobj['slug'], $questions[$slug]);
+            $of = count($sheet);
             $left = 0;
             foreach($sheet as $obj)
                 if (!isset($obj['decided']) && $obj['key_score'] != 1) $left += 1;
@@ -344,9 +344,9 @@ if (isset($_GET['qid']) && !isset(($qobj = qparse($_GET['qid']))['error'])) {
         }
         foreach($rev as $slug=>$val) if (strlen($slug) == 8) {
             echo "<tr><td>comment</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>$slug</a> &mdash; <a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment-random'>one-at-a-time w/o feedback</a></td><td";
-            $of = count($val);
 
             $sheet = get_comments($qobj['slug'], $slug);
+            $of = count($sheet);
             $left = 0;
             foreach($sheet as $uid=>$obj)
                 if (!is_array($obj)) $left += 1;
