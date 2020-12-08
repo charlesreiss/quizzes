@@ -520,7 +520,7 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     else
                         $review["$slug-answers"][$resp] = array($sobj['slug']);
                 }
-                if ($review !== FALSE && round($earn,6) != 1 && $sobj[$slug]['comments'])
+                if ($review !== FALSE && round($earn,6) != 1 && ($sobj[$slug]['comments'] || $q['type'] == 'box'))
                     $review[$slug][] = $sobj['slug'];
             }
         }
