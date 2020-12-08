@@ -38,15 +38,21 @@ function get_blanks($quizid, $q) {
     $ans = array();
     foreach($rev["$slug-answers"] as $txt=>$users) {
         $match = array();
+        $key_score = NULL;
         foreach($q['key'] as $key) {
             $k = $key['text'];
-            if(($k[0] == '/') ? preg_match($k, $txt) : $k == $txt)
+            if(($k[0] == '/') ? preg_match($k, $txt) : $k == $txt) {
                 $match[$k] = $key['points'];
+                if ($key_score === NULL || $key_score < $key['points']) {
+                    $key_score = $key['points'];
+                }
+            }
         }
         $ans[$txt] = array(
             'users' => $users,
             'matches' => $match,
             'decided' => (isset($ext[$txt]) ? $ext[$txt] : null),
+            'key_score' => $key_score,
         );
     }
     return $ans;
@@ -66,6 +72,10 @@ function get_comments($quizid, $slug) {
     $whom = $rev[$slug];
     $ans = array();
     foreach($whom as $k) $ans[$k] = null;
+    if (isset($rev["$slug-correct"])) {
+        $whom_perfect = $rev["$slug-correct"];
+        foreach($whom_perfect as $k) $ans[$k] = array("grade" => 1);
+    }
     if (file_exists("log/$quizid/adjustments_$slug.csv")) {
         $fh = fopen("log/$quizid/adjustments_$slug.csv", "r");
         while (($row = fgetcsv($fh)) !== FALSE) {
@@ -320,18 +330,6 @@ if (isset($_GET['qid']) && !isset(($qobj = qparse($_GET['qid']))['error'])) {
             }
         }
         */
-        foreach($rev as $slug=>$val) if (substr($slug,8) == '-answers-correct') {
-            $slug = substr($slug,0,8);
-            echo "<tr><td>blank (full credit)</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=blank'>$slug</a></td><td";
-            $of = count($val);
-            $sheet = get_blanks($qobj['slug'], $questions[$slug]);
-            $left = 0;
-            foreach($sheet as $obj)
-                if (!isset($obj['decided'])) $left += 1;
-            if ($left == 0) echo ' class="submitted"';
-            echo ">".($of-$left)." of $of";
-            echo "</td><td>".$questions[$slug]['text']."</td></tr>\n";
-        }
         foreach($rev as $slug=>$val) if (substr($slug,8) == '-answers') {
             $slug = substr($slug,0,8);
             echo "<tr><td>blank</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=blank'>$slug</a></td><td";
@@ -339,28 +337,10 @@ if (isset($_GET['qid']) && !isset(($qobj = qparse($_GET['qid']))['error'])) {
             $sheet = get_blanks($qobj['slug'], $questions[$slug]);
             $left = 0;
             foreach($sheet as $obj)
-                if (!isset($obj['decided'])) $left += 1;
+                if (!isset($obj['decided']) && $obj['key_score'] != 1) $left += 1;
             if ($left == 0) echo ' class="submitted"';
             echo ">".($of-$left)." of $of";
             echo "</td><td>".$questions[$slug]['text']."</td></tr>\n";
-        }
-        foreach($rev as $slug=>$val) if (substr($slug,8) == '-correct') {
-            echo "<tr><td>comment</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>$slug</a> (graded full credit) &mdash; <a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment-random'>one-at-a-time w/o feedback</a></td><td";
-            $of = count($val);
-
-            $sheet = get_comments($qobj['slug'], $slug);
-            $left = 0;
-            foreach($sheet as $uid=>$obj)
-                if (!is_array($obj)) $left += 1;
-
-            if ($left == 0) echo ' class="submitted"';
-            echo ">".($of-$left)." of $of";
-            echo "</td><td>".$questions[$slug]['text']."</td></tr>\n";
-            //$done = isset($rev["$slug-done"]) ? count($rev["$slug-done"]) : 0;
-            //if ($of <= $done) echo ' class="submitted"';
-            //echo '>';
-            //echo "${done} of $of";
-            //echo "</td><td>".$questions[$slug]['text']."</td></tr>\n";
         }
         foreach($rev as $slug=>$val) if (strlen($slug) == 8) {
             echo "<tr><td>comment</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>$slug</a> &mdash; <a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment-random'>one-at-a-time w/o feedback</a></td><td";
