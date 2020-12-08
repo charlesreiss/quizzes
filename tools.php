@@ -513,7 +513,7 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                         $earn = $obj[$resp];
                     else if (isset($obj[$resp]) && is_array($obj[$resp])) {
                         $earn = $obj[$resp]['grade'];
-                        $sobj[$slug]['feedback'] = $obj[$resp]['feedback'];
+                        $sobj[$slug]['feedback'] = $obj[$resp]['reply'];
                     }
                 }
                 $perfect = (round($earn,6) == 1);
