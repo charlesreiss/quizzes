@@ -512,7 +512,11 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     if (isset($obj[$resp]) && is_numeric($obj[$resp]))
                         $earn = $obj[$resp];
                 }
-                if ($review !== FALSE && round($earn,6) != 1 && $resp) {
+                $perfect = (round($earn,6) == 1);
+                if ($review !== FALSE && $resp) {
+                    $review_key = "$slug-answers";
+                    if ($perfect)
+                        $review_key = "$slug-answers-correct";
                     if (!isset($review["$slug-answers"]))
                         $review["$slug-answers"] = array();
                     if (isset($review["$slug-answers"][$resp]))
@@ -520,8 +524,12 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     else
                         $review["$slug-answers"][$resp] = array($sobj['slug']);
                 }
-                if ($review !== FALSE && round($earn,6) != 1 && ($sobj[$slug]['comments'] || $q['type'] == 'box'))
-                    $review[$slug][] = $sobj['slug'];
+                if ($review !== FALSE && ($sobj[$slug]['comments']) {
+                    $review_key = $slug;
+                    if ($perfect)
+                        $review_key = "$slug-correct";
+                    $review[$review_key][] = $sobj['slug'];
+                }
             }
         }
         if ($hist !== FALSE) {
