@@ -24,7 +24,7 @@ if ($data['kind'] == 'reply') {
     $fname = "log/$data[quiz]/key_$data[slug].json";
     $lock_fp = acquire_lock_for($fname);
     // race condition if multiple concurrent graders; maybe add file locking?
-    $ext = array($data['key']=>$data['val']);
+    $ext = array($data['key']=>array('grade' => $data['val'], 'reply' => $data['reply']));
     if (file_exists($fname)) $ext += json_decode(file_get_contents($fname),true);
     file_put_contents_recursive($fname,json_encode($ext));
     if (file_exists("log/$data[quiz]/hist.json"))

@@ -511,6 +511,10 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     $obj = json_decode(file_get_contents("log/$q[quizid]/key_$slug.json"), true);
                     if (isset($obj[$resp]) && is_numeric($obj[$resp]))
                         $earn = $obj[$resp];
+                    else if (isset($obj[$resp]) && is_array($obj[$resp])) {
+                        $earn = $obj[$resp]['grade'];
+                        $sobj[$slug]['feedback'] = $obj[$resp]['feedback'];
+                    }
                 }
                 $perfect = (round($earn,6) == 1);
                 if ($review !== FALSE && $resp) {

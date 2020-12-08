@@ -107,6 +107,7 @@ function show_blanks($quizid, $q, $mq) {
         }
         if (isset($details['decided'])) $score = $details['decided'];
         echo "<p>Portion (0 = no credit; 1 = full credit): <input type='text' id='a-$anum' value='$score' onchange='setKey(\"$anum\",".json_encode($opt).")' onkeydown='pending($\"$anum\")'/>";
+        echo "<p>Reply: <input type='text' id='r-$anum' value='$score' onchange='setKey(\"$anum\",".json_encode($opt).")' onkeydown='pending($\"$anum\")'/>";
         if (!isset($details['decided']))
             echo "<input type='button' onclick='setKey(\"$anum\",".json_encode($opt).")' id='delme-$anum' value='no reply needed'/>";
         echo "</p>";
@@ -226,12 +227,14 @@ function setKey(id, val) {
         document.getElementById('q-'+id).className = 'multiquestion disconnected';
         return
     }
+    let r = document.getElementById('r-'+id).value;
     let datum = {
         'kind':'key',
         'quiz':quizid,
         'slug':slug,
         'key':val,
         'val':v,
+        'reply':r,
     }
     console.log(datum);
     ajaxSend(datum, id);
