@@ -524,7 +524,7 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     else
                         $review["$slug-answers"][$resp] = array($sobj['slug']);
                 }
-                if ($review !== FALSE && ($sobj[$slug]['comments']) {
+                if ($review !== FALSE && $sobj[$slug]['comments']) {
                     $review_key = $slug;
                     if ($perfect)
                         $review_key = "$slug-correct";
