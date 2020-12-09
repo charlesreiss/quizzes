@@ -109,7 +109,7 @@ function show_blanks($quizid, $q, $mq) {
         $reply = "";
         if (isset($details['decided']) && is_array($details['decided']) {
             $score = $details['decided']['grade'];
-            $reply = $details['decided']['reply']
+            $reply = $details['decided']['reply'];
         }
         else if (isset($details['decided'])) $score = $details['decided'];
         echo "<p>Portion (0 = no credit; 1 = full credit): <input type='text' id='a-$anum' value='$score' onchange='setKey(\"$anum\",".json_encode($opt).")' onkeydown='pending($\"$anum\")'/>";
