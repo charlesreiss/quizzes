@@ -25,7 +25,8 @@ function get_review($quizid) {
  * values are arrays with three keys:
  *  "matches":{"quiz key":weight, "quiz key":weight, ...}
  *  "users":["mst3k", ...]
- *  "decided": (null or number)
+ *  "decided": (null or number or array {"grade":...,"reply":...})
+ *  "key_score": (null or number)
  */
 function get_blanks($quizid, $q) {
     $slug = $q['slug'];
@@ -105,9 +106,14 @@ function show_blanks($quizid, $q, $mq) {
             echo "<br/>matches key($weight): <code style='font-size:150%; border: thin solid gray'>".htmlentities($key)."</code>";
             if ($weight > $score) $score = $weight;
         }
-        if (isset($details['decided'])) $score = $details['decided'];
+        $reply = "";
+        if (isset($details['decided']) && is_array($details['decided']) {
+            $score = $details['decided']['grade'];
+            $reply = $details['decided']['reply']
+        }
+        else if (isset($details['decided'])) $score = $details['decided'];
         echo "<p>Portion (0 = no credit; 1 = full credit): <input type='text' id='a-$anum' value='$score' onchange='setKey(\"$anum\",".json_encode($opt).")' onkeydown='pending($\"$anum\")'/>";
-        echo "<p>Reply: <input type='text' id='r-$anum' value='$score' onchange='setKey(\"$anum\",".json_encode($opt).")' onkeydown='pending($\"$anum\")'/>";
+        echo "<p>Reply: <input type='text' id='r-$anum' value='$reply' onchange='setKey(\"$anum\",".json_encode($opt).")' onkeydown='pending($\"$anum\")'/>";
         if (!isset($details['decided']))
             echo "<input type='button' onclick='setKey(\"$anum\",".json_encode($opt).")' id='delme-$anum' value='no reply needed'/>";
         echo "</p>";
