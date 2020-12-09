@@ -107,7 +107,7 @@ function show_blanks($quizid, $q, $mq) {
             if ($weight > $score) $score = $weight;
         }
         $reply = "";
-        if (isset($details['decided']) && is_array($details['decided']) {
+        if (isset($details['decided']) && is_array($details['decided'])) {
             $score = $details['decided']['grade'];
             $reply = $details['decided']['reply'];
         }
