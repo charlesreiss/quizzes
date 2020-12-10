@@ -269,8 +269,8 @@ function showQuiz($qid, $blank = false) {
     if ($isstaff && isset($_GET['showkey'])) {
         $sobj['may_view_key'] = true;
     }
-    if ($isstaff && isset($_GET['showkeyifundone'])) {
-        $sobj['may_submit'] = false;
+    if ($isstaff && isset($_GET['nosubmit'])) {
+        $sobj['may_submit'] = NULL;
     }
     
     
@@ -278,6 +278,10 @@ function showQuiz($qid, $blank = false) {
         putLog("$qid/$user.log", '{"date":"'.date('Y-m-d H:i:s').'"}'."\n");
     if ($sobj['may_submit'] && !$qobj['allow_late'])
         echo "<div id='clock'>$sobj[time_left]</div>";
+
+    if ($isstaff && isset($_GET['nosubmit'])) {
+        $sobj['may_submit'] = NULL;
+    }
 
     $hist = (!$blank && $sobj['may_view_key']) ? histogram($qobj) : false;
     if ($hist) grade($qobj, $sobj); // annotate with score
