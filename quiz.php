@@ -269,6 +269,9 @@ function showQuiz($qid, $blank = false) {
     if ($isstaff && isset($_GET['showkey'])) {
         $sobj['may_view_key'] = true;
     }
+    if ($isstaff && isset($_GET['showkeyifundone'])) {
+        $sobj['may_submit'] = false;
+    }
     
     
     if ($sobj['may_submit'] && !$sobj['started'])
