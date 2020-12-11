@@ -526,7 +526,7 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     else
                         $review["$slug-answers"][$resp] = array($sobj['slug']);
                 }
-                if ($review !== FALSE && $sobj[$slug]['comments']) {
+                if ($review !== FALSE && ($sobj[$slug]['comments'] || $q['type'] == 'box')) {
                     $review_key = $slug;
                     if (!isset($review[$review_key])) {
                         $review[$review_key] = array();
