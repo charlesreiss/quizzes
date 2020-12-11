@@ -144,7 +144,7 @@ function show_one_comment($quizid, $q, $mq, $qobj, $user, $details) {
     if (isset($details['grade'])) $score = $details['grade'];
     if (isset($details['feedback'])) $feedback = $details['feedback'];
     
-    echo "<p>Points: <input type='text' id='a-$user' value='$score' onchange='setComment(\"$user\")' rawscore='$rawscore' onkeydown='pending(\"$user\")'/></p>";
+    echo "<p>Ratio: <input type='text' id='a-$user' value='$score' onchange='setComment(\"$user\")' rawscore='$rawscore' onkeydown='pending(\"$user\")'/></p>";
     
     echo "<div class='tinput'><span>Feedback:</span><textarea id='r-$user' onchange='setComment(\"$user\")' onkeydown='pending(\"$user\")'";
     echo ">";
