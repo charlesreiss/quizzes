@@ -181,7 +181,7 @@ function show_random_comment($quizid, $q, $mq, $only_ungraded=TRUE) {
     if (!$found_one) {
         echo("<p>No more to grade for this question.</p>");
     } else {
-        echo("<p><input type='button' onclick='setComment(\"$which_user\"); location.href = location.href;' value='submit and next'><input type='button' onclick='location.href = location.href;' value='another random'></p>");
+        echo("<p><input type='button' onclick='auto_reload = true;setComment(\"$which_user\");' value='submit and next'><input type='button' onclick='location.href = location.href;' value='another random'></p>");
     }
 
     ?><script>
@@ -219,6 +219,8 @@ function show_comments($quizid, $q, $mq) {
 <script type="text/javascript">//<!--
 var quizid = <?=json_encode(isset($_GET['qid']) ? $_GET['qid'] : null)?>;
 var slug = <?=json_encode(isset($_GET['slug']) ? $_GET['slug'] : null)?>;
+
+var auto_reload = false;
 
 function pending(num) {
     if (document.getElementById('q-'+num).className != "multiquestion submitting")
@@ -294,6 +296,9 @@ function ajaxSend(data, id) {
             if (xhr.status == 200) {
                 document.getElementById('q-'+id).className = "multiquestion submitted";
                 console.log("response: " + xhr.responseText);
+                if (auto_reload) {
+                    location.href = location.href;
+                }
             }
         }
     }
