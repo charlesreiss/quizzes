@@ -152,7 +152,7 @@ function show_one_comment($quizid, $q, $mq, $qobj, $user, $details) {
     echo "</textarea></div>";
 
     if (!isset($details))
-        echo "<input type='button' onclick='setComment(\"$user\")' id='delme-$user' value='no reply needed'/>";
+        echo "<input type='button' onclick='pending(\"$user\"); setComment(\"$user\")' id='delme-$user' value='no reply needed'/>";
 
     echo '</div>';
 }

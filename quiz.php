@@ -279,10 +279,6 @@ function showQuiz($qid, $blank = false) {
     if ($sobj['may_submit'] && !$qobj['allow_late'])
         echo "<div id='clock'>$sobj[time_left]</div>";
 
-    if ($isstaff && isset($_GET['nosubmit'])) {
-        $sobj['may_submit'] = NULL;
-    }
-
     $hist = (!$blank && $sobj['may_view_key']) ? histogram($qobj) : false;
     if ($hist) grade($qobj, $sobj); // annotate with score
 
