@@ -537,14 +537,6 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                 }
             }
         }
-        if ($hist !== FALSE) {
-            $hist[$slug]['right'] += $earn;
-            $hist[$slug]['total'] += 1;
-            if ($sobj['non_blank_correct']) {
-                $hist[$slug]['right_nonblank'] += $earn;
-                $hist[$slug]['total_nonblank'] += 1;
-            }
-        }
     } else {
         // assert(isset($q['options']));
         if ($hist !== FALSE && !isset($hist[$slug]))
@@ -575,6 +567,10 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
     if ($hist !== FALSE) {
         $hist[$slug]['right'] += $sobj[$slug]['score'];
         $hist[$slug]['total'] += 1;
+        if ($sobj['non_blank_correct']) {
+            $hist[$slug]['right_nonblank'] += $earn;
+            $hist[$slug]['total_nonblank'] += 1;
+        }
     }
     return $earn;
 }
@@ -592,7 +588,7 @@ function grade($qobj, &$sobj, &$review=FALSE, &$hist=FALSE) {
             if ($earn !== FALSE) {
                 $earned += $earn * $q['points'];
                 $outof += $q['points'];
-                if ($earn > 0 && $q['type'] == 'box' || $q['type'] == 'text') {
+                if ($earn > 0 && ($q['type'] == 'box' || $q['type'] == 'text')) {
                     $earned_blank += $earn;
                 }
             }
