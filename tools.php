@@ -568,7 +568,7 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
         $hist[$slug]['right'] += $sobj[$slug]['score'];
         $hist[$slug]['total'] += 1;
         if ($sobj['non_blank_correct']) {
-            $hist[$slug]['right_nonblank'] += $earn;
+            $hist[$slug]['right_nonblank'] += $sobj[$slug]['score'];
             $hist[$slug]['total_nonblank'] += 1;
         }
     }
