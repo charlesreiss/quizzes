@@ -122,7 +122,7 @@ function post_grades($prefix, $special=array()) {
 
 if (php_sapi_name() == "cli") { // command line
     // record as grades
-    post_grades("../uploads/Quiz ", array('exam2'=>'Exam2', 'labs'=>false));
+    post_grades("../uploads/Quiz ", array('exam'=>'final', 'labs'=>false));
 } else if (basename(__FILE__) == basename($_SERVER['SCRIPT_FILENAME'])) {
     // display
     header('Content-Type: text/plain; charset=utf-8'); 
