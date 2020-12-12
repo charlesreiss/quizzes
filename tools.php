@@ -517,7 +517,7 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     }
                 }
                 $perfect = (round($earn,6) == 1);
-                if ($review !== FALSE && $resp) {
+                if ($review !== FALSE && $resp && !isset($sobj[$slug]['feedback'])) {
                     $review_key = "$slug-answers";
                     if (!isset($review["$slug-answers"]))
                         $review["$slug-answers"] = array();
