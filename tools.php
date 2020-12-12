@@ -712,9 +712,10 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
         echo " (".round($replied['score'],2)." / $q[points] pt";
         if (isset($hist[$q['slug']]) && $hist[$q['slug']]['total']) {
             echo "; mean ".round($hist[$q['slug']]['right']/$hist[$q['slug']]['total'],2);
-            if ($qnum == 'exam') {
+            if ($quizid == 'exam') {
                 echo "; mean w/o mostly blank exams ".round($hist[$q['slug']]['right_nonblank']/$hist[$q['slug']]['total_nonblank'],2);
             }
+            echo ")";
         }
         else echo ")";
     } else if ($hist && $q['type'] != 'image') {
