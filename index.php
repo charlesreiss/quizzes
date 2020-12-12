@@ -60,6 +60,8 @@ foreach(glob('questions/*.md') as $i=>$name) {
         $hist = histogram($qobj);
         if (isset($hist['total']) && $hist['total'] > 0)
             echo "<br/>(mean: ".round(100*($hist['right']/$hist['total']),2)."%)";
+        if ($name == "exam" && isset($hist['total_nonblank']) && $hist['total_nonblank'] > 0)
+            echo "<br/>(mean w/o mostly blank exams: ".round(100*($hist['right_nonblank']/$hist['total_nonblank']),2)."%)";
     } else if ($sobj['started'] && $sobj['may_submit']) {
         echo "in progress";
     } else if ($sobj['started']) {
