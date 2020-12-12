@@ -540,6 +540,10 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
         if ($hist !== FALSE) {
             $hist[$slug]['right'] += $earn;
             $hist[$slug]['total'] += 1;
+            if ($sobj['non_blank_correct']) {
+                $hist[$slug]['right_nonblank'] += $earn;
+                $hist[$slug]['total_nonblank'] += 1;
+            }
         }
     } else {
         // assert(isset($q['options']));
@@ -581,16 +585,21 @@ function grade($qobj, &$sobj, &$review=FALSE, &$hist=FALSE) {
     if (!$sobj || !$sobj['started']) return 0;
     $earned = 0;
     $outof = 0;
+    $earned_blank = 0;
     foreach($qobj['q'] as $qg) {
         foreach($qg['q'] as $q) {
             $earn = gradeQuestion($q, $sobj, $review, $hist);
             if ($earn !== FALSE) {
                 $earned += $earn * $q['points'];
                 $outof += $q['points'];
+                if ($earn > 0 && $q['type'] == 'box' || $q['type'] == 'text') {
+                    $earned_blank += $earn;
+                }
             }
         }
     }
     $sobj['score'] = $outof ? $earned / $outof : 0;
+    $sobj['non_blank_correct'] = $earned_blank > 0 ? true : false;
     return $sobj['score'];
 }
 
@@ -622,7 +631,13 @@ function histogram($qobj, &$review=FALSE) {
         if (in_array($student, $metadata['staff'])) continue;
         $sobj = aparse($qobj['slug'], $student);
         $hist['total'] += 1;
-        $hist['right'] += grade($qobj, $sobj, $review, $hist);
+        grade($qobj, $sobj);
+        $current = grade($qobj, $sobj, $review, $hist);
+        if ($sobj['non_blank_correct']) {
+            $hist['total_nonblank'] += 1;
+            $hist['right_nonblank'] += $current;
+        }
+        $hist['right'] += $current;
     }
     file_put_contents_recursive($cache_hist, json_encode($hist, JSON_PRETTY));
     chmod($cache_hist, 0666);
@@ -695,8 +710,12 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
         echo " (dropped)";
     } else if ($hist && isset($replied['score']) && $q['type'] != 'image') {
         echo " (".round($replied['score'],2)." / $q[points] pt";
-        if (isset($hist[$q['slug']]) && $hist[$q['slug']]['total'])
-            echo "; mean ".round($hist[$q['slug']]['right']/$hist[$q['slug']]['total'],2).")";
+        if (isset($hist[$q['slug']]) && $hist[$q['slug']]['total']) {
+            echo "; mean ".round($hist[$q['slug']]['right']/$hist[$q['slug']]['total'],2);
+            if ($qnum == 'exam') {
+                echo "; mean w/o mostly blank exams ".round($hist[$q['slug']]['right_nonblank']/$hist[$q['slug']]['total_nonblank'],2);
+            }
+        }
         else echo ")";
     } else if ($hist && $q['type'] != 'image') {
         echo " ($q[points] pt";
