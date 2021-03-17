@@ -19,6 +19,7 @@ if ($sid === FALSE) {
     foreach (glob("log/$qid/*.log") as $j=>$logname) {
         $sid = pathinfo($logname, PATHINFO_FILENAME);
         $sobj = aparse($qobj, $sid);
+        grade($qobj, $sobj);
         $answers[$sid] = $sobj;
     }
 } else {
@@ -28,6 +29,7 @@ if ($sid === FALSE) {
         $time_cutoff = FALSE;
     }
     $answers = aparse($qobj, $sid, $time_cutoff);
+    grade($qobj, $answers);
 }
 echo json_encode($answers, JSON_PRETTY_PRINT);
 

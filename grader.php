@@ -112,10 +112,10 @@ function show_blanks($quizid, $q, $mq) {
             $reply = $details['decided']['reply'];
         }
         else if (isset($details['decided'])) $score = $details['decided'];
-        echo "<p>Portion (0 = no credit; 1 = full credit): <input type='text' id='a-$anum' value='$score' onchange='setKey(\"$anum\",".json_encode($opt).")' onkeydown='pending($\"$anum\")'/>";
-        echo "<p>Reply: <input type='text' id='r-$anum' value='$reply' onchange='setKey(\"$anum\",".json_encode($opt).")' onkeydown='pending($\"$anum\")'/>";
+        echo "<p>Portion (0 = no credit; 1 = full credit): <input type='text' id='a-$anum' value='$score' onchange='setKey(\"$anum\",".json_encode($opt,JSON_HEX_QUOT|JSON_HEX_APOS).")' onkeydown='pending($\"$anum\")'/>";
+        echo "<p>Reply: <input type='text' id='r-$anum' size=100 value='$reply' onchange='setKey(\"$anum\",".json_encode($opt,JSON_HEX_QUOT|JSON_HEX_APOS).")' onkeydown='pending($\"$anum\")'/>";
         if (!isset($details['decided']))
-            echo "<input type='button' onclick='setKey(\"$anum\",".json_encode($opt).")' id='delme-$anum' value='no reply needed'/>";
+            echo "<input type='button' onclick='setKey(\"$anum\",".json_encode($opt,JSON_HEX_QUOT|JSON_HEX_APOS).")' id='delme-$anum' value='no reply needed'/>";
         echo "</p>";
         echo "</div>";
     }
