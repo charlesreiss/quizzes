@@ -204,6 +204,8 @@ function qparse($qid) {
             $is_option = preg_match('/^\*?[a-zA-Z]\./', $line);
             $is_q = beginsWith($line, 'Question');
             $is_sq = beginsWith($line, 'Subquestion');
+            $is_qslug = beginsWith($line, 'slug: ');
+            $is_oslug = beginsWith($line, 'slug. ');
             $is_qexp = beginsWith($line, 'ex: ');
             $is_oexp = beginsWith($line, 'ex. ');
             $is_header = $is_mq || $is_q || $is_sq;
@@ -223,9 +225,21 @@ function qparse($qid) {
                 }
                 continue; 
             }
+            if ($is_oslug) {
+                if ($opt !== FALSE) {
+                    $opt['slug'] = trim(substr($line,6));
+                    continue;
+                } else { $is_text = true; }
+            }
             if ($is_oexp) {
                 if ($opt !== FALSE) {
                     $opt['explain'] = substr($line,4);
+                    continue;
+                } else { $is_text = true; }
+            }
+            if ($is_qslug) {
+                if ($q !== FALSE) {
+                    $q['slug'] = trim(substr($line,6));
                     continue;
                 } else { $is_text = true; }
             }
@@ -360,12 +374,16 @@ function qparse($qid) {
         foreach($all as &$mq) {
             foreach($mq['q'] as &$q) {
                 $qn += 1;
-                $q['slug'] = substr(sha1("questions/$qid.md $qn"), 32);
+                if (!isset($q['slug'])) {
+                    $q['slug'] = substr(sha1("questions/$qid.md $qn"), 32);
+                }
                 if (isset($q['options'])) {
                     $an = 0;
                     foreach($q['options'] as &$opt) {
                         $an += 1;
-                        $opt['slug'] = substr(sha1("questions/$qid.md $qn $an"), 32);
+                        if (!isset($opt['slug'])) {
+                            $opt['slug'] = substr(sha1("questions/$qid.md $qn $an"), 32);
+                        }
                     }
                 }
                 if ($q['type'] == 'checkbox') {
