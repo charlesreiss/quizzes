@@ -261,6 +261,8 @@ function showQuiz($qid, $blank = false) {
     $qobj = qparse($qid);
     if (isset($qobj['error'])) { echo $qobj['error']; return; }
 
+    if ($isstaff) {echo "<p>".$qobj['possible_points']." total points</p>";}
+
     echo "<h1 style='text-align:center'>$qobj[title]</h1>";
     
     $sobj = aparse($qobj, $user);

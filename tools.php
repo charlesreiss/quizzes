@@ -155,6 +155,8 @@ function qparse($qid) {
         return $_qparse[$qid] = json_decode(file_get_contents($cache),true);
     do {
         $updated = filemtime($filename);
+
+        $possible = 0;
         
         $ans = array( // defaults
             "title"=>"$metadata[quizname] $qid",
@@ -361,6 +363,7 @@ function qparse($qid) {
                 } else {
                     $q['points'] = 1.0;
                 }
+                $possible += $q['points'];
             }
         }
         fclose($fh);
@@ -408,6 +411,7 @@ function qparse($qid) {
         
         $ans['q'] = $all;
         $ans['slug'] = $qid;
+        $ans['possible_points'] = $possible;
         
         // cache results
         file_put_contents_recursive($cache, json_encode($ans, JSON_PRETTY));
