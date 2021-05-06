@@ -46,8 +46,8 @@ foreach(glob('questions/*.md') as $i=>$name) {
     echo "<td>$qobj[title]";
     if ($sobj['may_view_key']) echo "<br/><a href='quiz.php?qid=$name&view_only'>view without answers</a>";
     echo "</td>";
-    echo "<td>".date('D j M g:ia', $qobj['open'])."</td>";
-    echo "<td>".date('D j M g:ia', $qobj['due'])."</td>";
+    echo "<td>".date('D j M g:ia', $sobj['open'])."</td>";
+    echo "<td>".date('D j M g:ia', $sobj['due'])."</td>";
     echo "<td align=center>".durationString($sobj['time_left'])."</td>";
 
     echo "<td align=center>";
