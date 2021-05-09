@@ -122,6 +122,7 @@ function show_blanks($quizid, $q, $mq) {
 }
 
 function show_one_comment($quizid, $q, $mq, $qobj, $user, $details) {
+    global $hist;
     $sobj = aparse($qobj, $user);
     grade($qobj, $sobj); // annotate with score
     
@@ -144,7 +145,7 @@ function show_one_comment($quizid, $q, $mq, $qobj, $user, $details) {
     if (isset($details['grade'])) $score = $details['grade'];
     if (isset($details['feedback'])) $feedback = $details['feedback'];
    
-    echo "<p><a href='quiz.php?asuser=$user&view_only=1&qid=$quizid'>full quiz for user</a></p>";
+    echo "<p><a href='quiz.php?asuser=$user&nosubmit=1&qid=$quizid'>full quiz for user</a></p>";
      
     echo "<p>Ratio: <input type='text' id='a-$user' value='$score' onchange='setComment(\"$user\")' rawscore='$rawscore' onkeydown='pending(\"$user\")'/></p>";
     
@@ -160,6 +161,7 @@ function show_one_comment($quizid, $q, $mq, $qobj, $user, $details) {
 }
 
 function show_random_comment($quizid, $q, $mq, $only_ungraded=TRUE) {
+    global $hist;
     $qobj = qparse($quizid);
     $hist = histogram($qobj);
 
@@ -195,6 +197,7 @@ function show_random_comment($quizid, $q, $mq, $only_ungraded=TRUE) {
 }
 
 function show_comments($quizid, $q, $mq) {
+    global $hist;
     $qobj = qparse($quizid);
     $hist = histogram($qobj);
     
