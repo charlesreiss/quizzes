@@ -174,7 +174,7 @@ function show_random_comment($quizid, $q, $mq, $only_ungraded=TRUE) {
     
     foreach($users as $user) {
         $details = $all_comments[$user];
-        if (!isset($details['feedback'])) {
+        if (!isset($details['feedback']) && !isset($details['grade'])) {
             show_one_comment($quizid, $q, $mq, $qobj, $user, $details);
             $found_one = true;
             $which_user = $user;
