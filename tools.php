@@ -155,11 +155,10 @@ function qparse($qid) {
         return $_qparse[$qid] = json_decode(file_get_contents($cache),true);
     do {
         $updated = filemtime($filename);
-
-        $possible = 0;
         
         $ans = array( // defaults
             "title"=>"$metadata[quizname] $qid",
+            "qid"=>$qid,
             "seconds"=>0,
             "open"=>strtotime("2999-12-31 12:00"),
             "due"=>strtotime("2999-12-31 12:00"),
@@ -169,6 +168,7 @@ function qparse($qid) {
             "order"=>"shuffle",
             "unindexed"=>false,
             "allow_late"=>false,
+            "hide_key"=>false,
         );
         
         $fh = fopen($filename, 'rb');
@@ -206,8 +206,6 @@ function qparse($qid) {
             $is_option = preg_match('/^\*?[a-zA-Z]\./', $line);
             $is_q = beginsWith($line, 'Question');
             $is_sq = beginsWith($line, 'Subquestion');
-            $is_qslug = beginsWith($line, 'slug: ');
-            $is_oslug = beginsWith($line, 'slug. ');
             $is_qexp = beginsWith($line, 'ex: ');
             $is_oexp = beginsWith($line, 'ex. ');
             $is_header = $is_mq || $is_q || $is_sq;
@@ -227,21 +225,9 @@ function qparse($qid) {
                 }
                 continue; 
             }
-            if ($is_oslug) {
-                if ($opt !== FALSE) {
-                    $opt['slug'] = trim(substr($line,6));
-                    continue;
-                } else { $is_text = true; }
-            }
             if ($is_oexp) {
                 if ($opt !== FALSE) {
                     $opt['explain'] = substr($line,4);
-                    continue;
-                } else { $is_text = true; }
-            }
-            if ($is_qslug) {
-                if ($q !== FALSE) {
-                    $q['slug'] = trim(substr($line,6));
                     continue;
                 } else { $is_text = true; }
             }
@@ -363,7 +349,6 @@ function qparse($qid) {
                 } else {
                     $q['points'] = 1.0;
                 }
-                $possible += $q['points'];
             }
         }
         fclose($fh);
@@ -377,16 +362,12 @@ function qparse($qid) {
         foreach($all as &$mq) {
             foreach($mq['q'] as &$q) {
                 $qn += 1;
-                if (!isset($q['slug'])) {
-                    $q['slug'] = substr(sha1("questions/$qid.md $qn"), 32);
-                }
+                $q['slug'] = substr(sha1("questions/$qid.md $qn"), 32);
                 if (isset($q['options'])) {
                     $an = 0;
                     foreach($q['options'] as &$opt) {
                         $an += 1;
-                        if (!isset($opt['slug'])) {
-                            $opt['slug'] = substr(sha1("questions/$qid.md $qn $an"), 32);
-                        }
+                        $opt['slug'] = substr(sha1("questions/$qid.md $qn $an"), 32);
                     }
                 }
                 if ($q['type'] == 'checkbox') {
@@ -411,7 +392,6 @@ function qparse($qid) {
         
         $ans['q'] = $all;
         $ans['slug'] = $qid;
-        $ans['possible_points'] = $possible;
         
         // cache results
         file_put_contents_recursive($cache, json_encode($ans, JSON_PRETTY));
@@ -472,29 +452,22 @@ function aparse($qobj, $sid, $time_cutoff=FALSE) {
     global $metadata;
     $now = time();
     // view any open quiz, even if time's up
-    $open = $qobj['open'];
+    $ans['may_view'] = in_array($sid, $metadata['staff']) || $qobj['open'] <= $now;
     if (isset($metadata['open_'.$qobj['slug']][$sid])) {
-        $open = strtotime($metadata['open_'.$qobj['slug']][$sid]);
+        $ans['may_view'] = strtotime($metadata['open_'.$qobj]['slug'][$sid]) <= $now;
     }
-    $due = $qobj['due'];
-    if (isset($metadata['due_'.$qobj['slug']][$sid])) {
-        $due = strtotime($metadata['due_'.$qobj['slug']][$sid]);
-    }
-    $ans['open'] = $open;
-    $ans['due'] = $due;
-    $ans['may_view'] = in_array($sid, $metadata['staff']) || $open <= $now;
     $ans['unindexed'] = $qobj['unindexed'];
     // view key of any non-keyless past-due quiz
-    $ans['may_view_key'] = $due < $now && !$qobj['keyless'] && !$qobj['hide_key'];
+    $ans['may_view_key'] = $qobj['due'] < $now && !$qobj['keyless'] && !$qobj['hide_key'];
     $time_left = $qobj['seconds'];
     if (isset($metadata['time_mult'][$sid]))
         $time_left *= $metadata['time_mult'][$sid];
     if ($time_left == 0) { // no time limit? only due date matters
-        $time_left = $due - $now;
+        $time_left = $qobj['due'] - $now;
     } else { // time limit? due date still wins unless keyless
         if (isset($ans['start'])) $time_left += $ans['start'] - $now;
-        if (!$qobj['keyless'] && $due < $time_left+$now)
-            $time_left = $due - $now;
+        if (!$qobj['keyless'] && $qobj['due'] < $time_left+$now)
+            $time_left = $qobj['due'] - $now;
     }
     $ans['time_left'] = $time_left;
     $ans['may_submit'] = $ans['may_view'] && !$ans['may_view_key'] && ($time_left >= 0 || $qobj['allow_late']);
@@ -573,23 +546,18 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
         if (!$graded) $earn = $q['blank'];
         if (isset($sobj[$slug]['answer'])) {
             $resp = $sobj[$slug]['answer'];
-        } else {
-            $resp = array();
-        }
-        if (1) {
 //error_log(json_encode($resp));
             foreach($q['options'] as $opt) {
+                if (!$graded && isset($opt['autocredit']) && $opt['autocredit'] && $opt['points'] > 0) {
+                    $earn += $opt['points'];
+                }
                 if (in_array($opt['slug'],$resp)) {
-                    if (!$graded && isset($opt['autocredit']) && $opt['autocredit'] && $opt['points'] == 0) $earn = 1;
-                    elseif (!$graded && isset($opt['autocredit']) && $opt['autocredit']) $earn += max(0, $opt['points']);
-                    elseif (!$graded && (!isset($opt['autocredit']) || !$opt['autocredit'])) $earn += $opt['points'];
+                    if (!$graded && (!isset($opt['autocredit']) || !$opt['autocredit'])) $earn += $opt['points'];
                     if ($hist !== FALSE)
                         if (isset($hist[$slug][$opt['slug']]))
                             $hist[$slug][$opt['slug']] += 1;
                         else
                             $hist[$slug][$opt['slug']] = 1;
-                } elseif (!$graded && isset($opt['autocredit']) && $opt['autocredit']) {
-                    $earn += max(0, $opt['points']);
                 }
             }
             if ($review !== FALSE && round($earn,6) != 1 
@@ -728,7 +696,7 @@ function fractionOf($num) {
     return ' ';
 }
 
-function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=false, $replied=array(), $disable=false, $hist=false, $ajax=true, $unshuffle=false){
+function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=false, $replied=array(), $disable=false, $hist=false, $ajax=true, $unshuffle=false, $default_ordering='shuffle'){
     global $metadata;
     $postcall = "postAns(".htmlspecialchars(json_encode($quizid)).", $qnum)";
     
@@ -764,7 +732,7 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
         echo '<ol class="options">';
         
         // should I shuffle (or sort) options?
-        $ordering = $q['pin'] ? 'pin' : qparse($quizid)['order'];
+        $ordering = $q['pin'] ? 'pin' : $default_ordering;
         //echo "<pre>$ordering srand(".crc32("$user $q[slug]").")</pre>";
         if (!$unshuffle && $ordering == 'shuffle') {
             srand(crc32("$user $q[slug]"));
@@ -875,5 +843,55 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
     echo "</div>";
 }
 
+function showQuizFromAParse($qobj, $sobj, $blank = false, $blank_includes_key = false) {
+    global $isstaff, $user;
+    if (isset($qobj['error'])) { echo $qobj['error']; return; }
+    if (!$sobj['may_view']) { echo "You may not view this quiz"; return; }
 
+    echo "<h1 style='text-align:center'>$qobj[title]</h1>";
+
+    $include_key = $sobj['may_view_key'];
+    if ($blank && $sobj['may_view_key']) {
+        $include_key = $blank_includes_key;
+    }
+
+    $hist = $include_key ? histogram($qobj) : false;
+    if ($hist && !$blank) grade($qobj, $sobj); // annotate with score
+   
+    echo "<div class='directions'>$qobj[directions]</div>";
+    
+    if ($qobj['qorder'] == 'shuffle' && $hist === false && !$isstaff) {
+        srand(crc32("$user $qobj[slug]"));
+        shuffle($qobj['q']);
+    }
+
+    $qnum = 0;
+    $qid = $qobj['qid'];
+    foreach($qobj['q'] as $qg) {
+        if ($qobj['qorder'] == 'shuffle' && $hist === false && !$isstaff) {
+            srand(crc32("$user $qobj[slug] $qnum"));
+            shuffle($qg['q']);
+        }
+
+        if (count($qg['q']) > 1 || $qg['text'])
+            echo '<div class="multiquestion">';
+        if ($qg['text']) echo $qg['text'];
+        foreach($qg['q'] as $q) {
+            $qnum += 1;
+            
+            showQuestion($q, $qid, $qnum, $user, $qobj['comments']
+                ,$qg['text'] # seeabove
+                ,(!$blank && isset($sobj[$q['slug']])) #replied
+                    ? $sobj[$q['slug']]
+                    : array('answer'=>array(),'comments'=>'')
+                ,(!$sobj['may_submit'] && !$blank) #disable
+                ,$hist #hist
+                ,!$blank # ajax
+                ,$isstaff || $hist !== false, # unshuffle
+                isset($qobj['order']) ? $qobj['order'] : 'shuffle' #default_ordering
+                );
+        }
+        if (count($qg['q']) > 1 || $qg['text']) echo '</div>';
+    }
+}
 ?>

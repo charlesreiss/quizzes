@@ -261,12 +261,7 @@ function showQuiz($qid, $blank = false) {
     $qobj = qparse($qid);
     if (isset($qobj['error'])) { echo $qobj['error']; return; }
 
-    if ($isstaff) {echo "<p>".$qobj['possible_points']." total points</p>";}
-
-    echo "<h1 style='text-align:center'>$qobj[title]</h1>";
-    
     $sobj = aparse($qobj, $user);
-    if (!$sobj['may_view']) { echo "You may not view this quiz"; return; }
 
     if ($isstaff && isset($_GET['showkey'])) {
         $sobj['may_view_key'] = true;
@@ -275,48 +270,14 @@ function showQuiz($qid, $blank = false) {
         $sobj['may_submit'] = NULL;
     }
     
-    
     if ($sobj['may_submit'] && !$sobj['started'])
         putLog("$qid/$user.log", '{"date":"'.date('Y-m-d H:i:s').'"}'."\n");
     if ($sobj['may_submit'] && !$qobj['allow_late'])
         echo "<div id='clock'>$sobj[time_left]</div>";
-
-    $hist = (!$blank && $sobj['may_view_key']) ? histogram($qobj) : false;
-    if ($hist) grade($qobj, $sobj); // annotate with score
-
-   
-    echo "<div class='directions'>$qobj[directions]</div>";
     
-    if ($qobj['qorder'] == 'shuffle' && $hist === false && !$isstaff) {
-        srand(crc32("$user $qobj[slug]"));
-        shuffle($qobj['q']);
-    }
+    if ($isstaff) {echo "<p>".$qobj['possible_points']." total points</p>";}
 
-    $qnum = 0;
-    foreach($qobj['q'] as $qg) {
-
-        if ($qobj['qorder'] == 'shuffle' && $hist === false && !$isstaff)
-            shuffle($qg['q']);
-
-        if (count($qg['q']) > 1 || $qg['text'])
-            echo '<div class="multiquestion">';
-        if ($qg['text']) echo $qg['text'];
-        foreach($qg['q'] as $q) {
-            $qnum += 1;
-            
-            showQuestion($q, $qid, $qnum, $user, $qobj['comments']
-                ,$qg['text']
-                ,(!$blank && isset($sobj[$q['slug']]))
-                    ? $sobj[$q['slug']]
-                    : array('answer'=>array(),'comments'=>'')
-                ,(!$sobj['may_submit'] && !$blank)
-                ,$hist
-                ,!$blank
-                ,$isstaff || $hist !== false
-                );
-        }
-        if (count($qg['q']) > 1 || $qg['text']) echo '</div>';
-    }
+    showQuizFromAParse($qobj, $sobj, $blank);
 }
 
 imgup();
