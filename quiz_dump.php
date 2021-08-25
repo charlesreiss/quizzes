@@ -5,6 +5,7 @@ require_once "tools.php";
 ?>
 <html>
 <head>
+    <meta charset="utf-8">
     <title><?=$_GET['title']?></title>
     <style>
         <?=file_get_contents("style.css")?>
