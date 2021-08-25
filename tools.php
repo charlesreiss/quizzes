@@ -765,6 +765,8 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
                 if (isset($hist[$q['slug']][$opt['slug']]))
                     echo round(100*$hist[$q['slug']][$opt['slug']] / $hist[$q['slug']]['total'])."%";
                 echo "</div>";
+            }
+            if ($hist) {
                 echo "<div style='flex-basis: 1.5em; text-align:right; flex-grow:0; flex-shrink:0; color:green;'>";
                 if ($q['type'] == 'checkbox') echo $opt['points'] > 0 ? '⊤' : '';
                 else echo $metadata['detailed-partial'] 

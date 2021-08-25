@@ -275,8 +275,6 @@ function showQuiz($qid, $blank = false) {
     if ($sobj['may_submit'] && !$qobj['allow_late'])
         echo "<div id='clock'>$sobj[time_left]</div>";
     
-    if ($isstaff) {echo "<p>".$qobj['possible_points']." total points</p>";}
-
     showQuizFromAParse($qobj, $sobj, $blank);
 }
 
