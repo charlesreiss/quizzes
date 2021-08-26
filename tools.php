@@ -156,6 +156,8 @@ function qparse($qid) {
     do {
         $updated = filemtime($filename);
         
+        $possible = 0;
+
         $ans = array( // defaults
             "title"=>"$metadata[quizname] $qid",
             "qid"=>$qid,
@@ -208,6 +210,8 @@ function qparse($qid) {
             $is_sq = beginsWith($line, 'Subquestion');
             $is_qexp = beginsWith($line, 'ex: ');
             $is_oexp = beginsWith($line, 'ex. ');
+            $is_qslug = beginsWith($line, 'slug: ');
+            $is_oslug = beginsWith($line, 'slug. ');
             $is_header = $is_mq || $is_q || $is_sq;
             $is_text = !$is_header && !$is_key && !$is_option && !$is_oexp && !$is_qexp;
 
@@ -225,6 +229,12 @@ function qparse($qid) {
                 }
                 continue; 
             }
+            if ($is_oslug) {
+                if ($opt !== FALSE) {
+                    $opt['slug'] = trim(substr($line,6));
+                    continue;
+                } else { $is_text = true; }
+            }
             if ($is_oexp) {
                 if ($opt !== FALSE) {
                     $opt['explain'] = substr($line,4);
@@ -234,6 +244,12 @@ function qparse($qid) {
             if ($is_qexp) {
                 if ($q !== FALSE) {
                     $q['explain'] = substr($line,4);
+                    continue;
+                } else { $is_text = true; }
+            }
+            if ($is_qslug) {
+                if ($q !== FALSE) {
+                    $q['slug'] = trim(substr($line,6));
                     continue;
                 } else { $is_text = true; }
             }
@@ -349,6 +365,7 @@ function qparse($qid) {
                 } else {
                     $q['points'] = 1.0;
                 }
+                $possible += $q['points'];
             }
         }
         fclose($fh);
@@ -362,12 +379,16 @@ function qparse($qid) {
         foreach($all as &$mq) {
             foreach($mq['q'] as &$q) {
                 $qn += 1;
-                $q['slug'] = substr(sha1("questions/$qid.md $qn"), 32);
+                if (!isset($q['slug'])) {
+                    $q['slug'] = substr(sha1("questions/$qid.md $qn"), 32);
+                }
                 if (isset($q['options'])) {
                     $an = 0;
                     foreach($q['options'] as &$opt) {
                         $an += 1;
-                        $opt['slug'] = substr(sha1("questions/$qid.md $qn $an"), 32);
+                        if (!isset($opt['slug'])) {
+                            $opt['slug'] = substr(sha1("questions/$qid.md $qn $an"), 32);
+                        }
                     }
                 }
                 if ($q['type'] == 'checkbox') {
@@ -392,6 +413,7 @@ function qparse($qid) {
         
         $ans['q'] = $all;
         $ans['slug'] = $qid;
+        $ans['possible_points'] = $possible;
         
         // cache results
         file_put_contents_recursive($cache, json_encode($ans, JSON_PRETTY));
@@ -473,8 +495,8 @@ function aparse($qobj, $sid, $time_cutoff=FALSE) {
         $time_left = $qobj['due'] - $now;
     } else { // time limit? due date still wins unless keyless
         if (isset($ans['start'])) $time_left += $ans['start'] - $now;
-        if (!$qobj['keyless'] && $qobj['due'] < $time_left+$now)
-            $time_left = $qobj['due'] - $now;
+        if (!$qobj['keyless'] && $due < $time_left+$now)
+            $time_left = $due - $now;
     }
     $ans['time_left'] = $time_left;
     $ans['may_submit'] = $ans['may_view'] && !$ans['may_view_key'] && ($time_left >= 0 || $qobj['allow_late']);
@@ -553,18 +575,23 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
         if (!$graded) $earn = $q['blank'];
         if (isset($sobj[$slug]['answer'])) {
             $resp = $sobj[$slug]['answer'];
+        } else {
+            $resp = array();
+        }
+        if (1) {
 //error_log(json_encode($resp));
             foreach($q['options'] as $opt) {
-                if (!$graded && isset($opt['autocredit']) && $opt['autocredit'] && $opt['points'] > 0) {
-                    $earn += $opt['points'];
-                }
                 if (in_array($opt['slug'],$resp)) {
-                    if (!$graded && (!isset($opt['autocredit']) || !$opt['autocredit'])) $earn += $opt['points'];
+                    if (!$graded && isset($opt['autocredit']) && $opt['autocredit'] && $opt['points'] == 0) $earn = 1;
+                    elseif (!$graded && isset($opt['autocredit']) && $opt['autocredit']) $earn += max(0, $opt['points']);
+                    elseif (!$graded && (!isset($opt['autocredit']) || !$opt['autocredit'])) $earn += $opt['points'];
                     if ($hist !== FALSE)
                         if (isset($hist[$slug][$opt['slug']]))
                             $hist[$slug][$opt['slug']] += 1;
                         else
                             $hist[$slug][$opt['slug']] = 1;
+                } elseif (!$graded && isset($opt['autocredit']) && $opt['autocredit']) {
+                    $earn += max(0, $opt['points']);
                 }
             }
             if ($review !== FALSE && round($earn,6) != 1 
