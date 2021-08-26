@@ -452,13 +452,20 @@ function aparse($qobj, $sid, $time_cutoff=FALSE) {
     global $metadata;
     $now = time();
     // view any open quiz, even if time's up
-    $ans['may_view'] = in_array($sid, $metadata['staff']) || $qobj['open'] <= $now;
+    $open = $qobj['open'];
     if (isset($metadata['open_'.$qobj['slug']][$sid])) {
-        $ans['may_view'] = strtotime($metadata['open_'.$qobj]['slug'][$sid]) <= $now;
+        $open = strtotime($metadata['open_'.$qobj['slug']][$sid]);
     }
+    $due = $qobj['due'];
+    if (isset($metadata['due_'.$qobj['slug']][$sid])) {
+        $due = strtotime($metadata['due_'.$qobj['slug']][$sid]);
+    }
+    $ans['open'] = $open;
+    $ans['due'] = $due;
+    $ans['may_view'] = in_array($sid, $metadata['staff']) || $open <= $now;
     $ans['unindexed'] = $qobj['unindexed'];
     // view key of any non-keyless past-due quiz
-    $ans['may_view_key'] = $qobj['due'] < $now && !$qobj['keyless'] && !$qobj['hide_key'];
+    $ans['may_view_key'] = $due < $now && !$qobj['keyless'] && !$qobj['hide_key'];
     $time_left = $qobj['seconds'];
     if (isset($metadata['time_mult'][$sid]))
         $time_left *= $metadata['time_mult'][$sid];
