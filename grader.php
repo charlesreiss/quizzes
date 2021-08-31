@@ -137,6 +137,7 @@ function show_one_comment($quizid, $q, $mq, $qobj, $user, $details) {
         ,$hist
         ,true
         ,false
+        ,isset($qobj['order']) ? $qobj['order'] : 'shuffle'
         );
     $score = isset($sobj[$q['slug']]['score']) ? $sobj[$q['slug']]['score'] : 0;
     if ($q['points']) $score /= $q['points'];

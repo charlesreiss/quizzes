@@ -22,6 +22,7 @@ function pending(num) {
     if (document.getElementById('q'+num).className != "question submitting")
         document.getElementById('q'+num).className = "question submitting";
 }
+var sequence = 0;
 function postAns(name, num) {
     document.getElementById('q'+num).className = "question submitting";
     var ans = {
@@ -29,8 +30,10 @@ function postAns(name, num) {
         'session_id':"<?php echo make_or_get_session($user, $_GET['qid'])?>",
         'quiz':name,
         'slug':document.getElementById("q"+num).getAttribute('slug'), 
-        'answer':[]
+        'answer':[],
+        'sequence':sequence,
     };
+    sequence = sequence + 1;
     var elems = document.getElementsByName("ans"+num);
     for(var i=0; i<elems.length; i+=1) {
         var elem = elems[i];
