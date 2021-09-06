@@ -811,6 +811,8 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
             echo "<input type='$q[type]' name='ans$qnum' value='$opt[slug]' $subm";
             if (isset($replied['answer']) && in_array($opt['slug'], $replied['answer'])) echo " checked='checked'";
             echo "/>";
+            if ($hist && isset($opt['autocredit']) && $opt['autocredit'])
+                echo "<span class='explanation'>(credit given for any answer)</span>";
             echo "<div>$opt[text]</div>";
             echo "</label>";
             if ($hist && $unshuffle && isset($opt['explain']))
