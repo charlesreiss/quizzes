@@ -38,6 +38,7 @@ function get_blanks($quizid, $q) {
 
     $ans = array();
     foreach($rev["$slug-answers"] as $txt=>$users) {
+        $txt = "$txt"; # force to be text, not number so correct JS is generated
         $match = array();
         $key_score = NULL;
         foreach($q['key'] as $key) {
