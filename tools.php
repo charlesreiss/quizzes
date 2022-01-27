@@ -807,6 +807,8 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
                     ? fractionOf($opt['points']) 
                     : ($opt['points'] == 1 ? '⊤' : ($opt['points'] > 0 ? '½' : ''));
                 echo "</div>";
+                if ($opt['points'] == 1)
+                    echo "<span class='explanation'>(correct answer)</span>";
             }
             echo "<input type='$q[type]' name='ans$qnum' value='$opt[slug]' $subm";
             if (isset($replied['answer']) && in_array($opt['slug'], $replied['answer'])) echo " checked='checked'";
