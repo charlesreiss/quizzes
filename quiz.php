@@ -284,7 +284,7 @@ function showQuiz($qid, $blank = false) {
 imgup();
 if ($isstaff) {
 ?>
-    <a href="?qid=<?php $_GET['qid']?>&showkey=1">view with key (staff only)</a>
+    <a href="?qid=<?php echo $_GET['qid'];?>&showkey=1">view with key (staff only)</a>
 <?php
 }
 showQuiz($_GET['qid'], isset($_GET['view_only']));
