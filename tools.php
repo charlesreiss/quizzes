@@ -167,7 +167,7 @@ function qparse($qid) {
             "directions"=>"",
             "comments"=>true,
             "keyless"=>false,
-            "order"=>"shuffle",
+            "order"=>"same",
             "unindexed"=>false,
             "allow_late"=>false,
             "hide_key"=>false,
