@@ -14,8 +14,10 @@ if (php_sapi_name() == "cli") { // let run from commandline for testing
     $user = $_SERVER['PHP_AUTH_USER'];
     $isstaff = in_array($user, $metadata['staff']);
 }
+$realisstaff = $isstaff;
 if ($isstaff && array_key_exists('asuser', $_GET)) {
     $user = basename($_GET['asuser']); // remove slashes
+    $realisstaff = true;
     $isstaff = in_array($user, $metadata['staff']);
 }
 

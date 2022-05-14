@@ -114,7 +114,7 @@ function show_blanks($quizid, $q, $mq) {
         }
         else if (isset($details['decided'])) $score = $details['decided'];
         echo "<p>Portion (0 = no credit; 1 = full credit): <input type='text' id='a-$anum' value='$score' onchange='setKey(\"$anum\",".json_encode($opt,JSON_HEX_QUOT|JSON_HEX_APOS).")' onkeydown='pending($\"$anum\")'/>";
-        echo "<p>Reply: <input type='text' id='r-$anum' size=100 value='$reply' onchange='setKey(\"$anum\",".json_encode($opt,JSON_HEX_QUOT|JSON_HEX_APOS).")' onkeydown='pending($\"$anum\")'/>";
+        echo "<p>Reply: <input type='text' id='r-$anum' size=100 value=\"".htmlentities($reply)."\" onchange='setKey(\"$anum\",".json_encode($opt,JSON_HEX_QUOT|JSON_HEX_APOS).")' onkeydown='pending($\"$anum\")'/>";
         if (!isset($details['decided']))
             echo "<input type='button' onclick='setKey(\"$anum\",".json_encode($opt,JSON_HEX_QUOT|JSON_HEX_APOS).")' id='delme-$anum' value='no reply needed'/>";
         echo "</p>";
@@ -147,7 +147,7 @@ function show_one_comment($quizid, $q, $mq, $qobj, $user, $details) {
     if (isset($details['grade'])) $score = $details['grade'];
     if (isset($details['feedback'])) $feedback = $details['feedback'];
    
-    echo "<p><a href='quiz.php?asuser=$user&nosubmit=1&qid=$quizid'>full quiz for user</a></p>";
+    echo "<p><a href='quiz.php?asuser=$user&nosubmit=1&qid=$quizid&showkey=1'>full quiz for user</a></p>";
      
     echo "<p>Ratio: <input type='text' id='a-$user' value='$score' onchange='setComment(\"$user\")' rawscore='$rawscore' onkeydown='pending(\"$user\")'/></p>";
     
@@ -336,50 +336,39 @@ if (isset($_GET['qid']) && !isset(($qobj = qparse($_GET['qid']))['error'])) {
     } else {
         $rev = get_review($qobj['slug']);
         ?><table><thead>
-            <tr><th>Kind</th><th>Hash</th><th>Done</th><th>Text</th></tr>
+            <tr><th>Kind</th><th>#</th><th>Hash</th><th>Done</th><th>Text</th></tr>
         </thead><tbody>
         <?php
-        /*
         $qnum = 0;
+        $qnum_map = array();
+        $qid = $_GET['qid'];
         foreach($questions as $num=>$q) {
             $qnum += 1;
-            if (isset($rev["$q[slug]-answers"])) {
-                echo "<tr><td>Question $qnum blank</td></tr>";
+            $slug = $q['slug'];
+            $qobj = $q;
+            if (isset($rev["$slug-answers"])) {
+                echo "<tr><td>blank</td><td>$qnum</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=blank'>$slug</a></td><td";
+                $sheet = get_blanks($qid, $questions[$slug]);
+                $of = count($sheet);
+                $left = 0;
+                foreach($sheet as $obj)
+                    if (!isset($obj['decided']) && $obj['key_score'] != 1) $left += 1;
+                if ($left == 0) echo ' class="submitted"';
+                echo ">".($of-$left)." of $of";
+                echo "</td><td>".$questions[$slug]['text']."</td></tr>\n";
             }
-            if (isset($rev["$q[slug]"])) {
-                echo "<tr><td>Question $qnum comments</td></tr>";
+            if (isset($rev["$slug"])) {
+                echo "<tr><td>comment</td><td>$qnum</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>$slug</a> &mdash; <a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment-random'>one-at-a-time w/o feedback</a></td><td";
+                $sheet = get_comments($qid, $slug);
+                $of = count($sheet);
+                $left = 0;
+                foreach($sheet as $uid=>$obj)
+                    if (!is_array($obj)) $left += 1;
+
+                if ($left == 0) echo ' class="submitted"';
+                echo ">".($of-$left)." of $of";
+                echo "</td><td>".$questions[$slug]['text']."</td></tr>\n";
             }
-        }
-        */
-        foreach($rev as $slug=>$val) if (substr($slug,8) == '-answers') {
-            $slug = substr($slug,0,8);
-            echo "<tr><td>blank</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=blank'>$slug</a></td><td";
-            $sheet = get_blanks($qobj['slug'], $questions[$slug]);
-            $of = count($sheet);
-            $left = 0;
-            foreach($sheet as $obj)
-                if (!isset($obj['decided']) && $obj['key_score'] != 1) $left += 1;
-            if ($left == 0) echo ' class="submitted"';
-            echo ">".($of-$left)." of $of";
-            echo "</td><td>".$questions[$slug]['text']."</td></tr>\n";
-        }
-        foreach($rev as $slug=>$val) if (strlen($slug) == 8) {
-            echo "<tr><td>comment</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>$slug</a> &mdash; <a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment-random'>one-at-a-time w/o feedback</a></td><td";
-
-            $sheet = get_comments($qobj['slug'], $slug);
-            $of = count($sheet);
-            $left = 0;
-            foreach($sheet as $uid=>$obj)
-                if (!is_array($obj)) $left += 1;
-
-            if ($left == 0) echo ' class="submitted"';
-            echo ">".($of-$left)." of $of";
-            echo "</td><td>".$questions[$slug]['text']."</td></tr>\n";
-            //$done = isset($rev["$slug-done"]) ? count($rev["$slug-done"]) : 0;
-            //if ($of <= $done) echo ' class="submitted"';
-            //echo '>';
-            //echo "${done} of $of";
-            //echo "</td><td>".$questions[$slug]['text']."</td></tr>\n";
         }
         ?></tbody></table><?php
     }

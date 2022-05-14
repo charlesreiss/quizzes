@@ -260,13 +260,13 @@ function imgup() {
 }
 
 function showQuiz($qid, $blank = false) {
-    global $user, $metadata, $isstaff;
+    global $user, $metadata, $isstaff, $realisstaff;
     $qobj = qparse($qid);
     if (isset($qobj['error'])) { echo $qobj['error']; return; }
 
     $sobj = aparse($qobj, $user);
 
-    if ($isstaff && isset($_GET['showkey'])) {
+    if ($realisstaff && isset($_GET['showkey'])) {
         $sobj['may_view_key'] = true;
     }
     if ($isstaff && isset($_GET['nosubmit'])) {

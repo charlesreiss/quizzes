@@ -866,7 +866,8 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
 
     
     if ($comments && $ajax && (!$disable || isset($replied['comments']) && $replied['comments'])) {
-        echo "<div class='tinput'><span>Comments:</span><textarea id='comments$qnum' onchange='$postcall' onkeydown='pending($qnum)' onblur='$postcall'";
+        echo "<div class='tinput'><span>Comments:</span><textarea ";
+        if (!disable) echo "id='comments$qnum' onchange='$postcall' onkeydown='pending($qnum)' onblur='$postcall'";
         if ($disable) echo " disabled='disabled'";
         echo ">";
         echo htmlentities($replied['comments']);
