@@ -10,4 +10,5 @@
     }
 ,"detailed-partial":true
 ,"server-side KaTeX":false
+,"cors-origin":"https://kytos02.cs.virginia.edu/"
 }

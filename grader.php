@@ -129,7 +129,7 @@ function show_blanks($quizid, $q, $mq) {
             if ($weight > $score) $score = $weight;
         }
         if (isset($details['decided'])) $score = $details['decided'];
-        echo "<p>Points: <input type='text' id='a-$anum' value='$score' onchange='setKey(\"$anum\",".json_encode(str_replace("'","&apos;",$opt)).")' onkeydown='pending($\"$anum\")'/>";
+        echo "<p>Portion (0 = no credit; 1 = full credit): <input type='text' id='a-$anum' value='$score' onchange='setKey(\"$anum\",".json_encode(str_replace("'","&apos;",$opt)).")' onkeydown='pending($\"$anum\")'/>";
         if (!isset($details['decided']))
             echo "<input type='button' onclick='setKey(\"$anum\",".json_encode(str_replace("'","&apos;",$opt)).")' id='delme-$anum' value='no reply needed'/>";
         echo "</p>";
@@ -137,45 +137,75 @@ function show_blanks($quizid, $q, $mq) {
     }
 }
 
+function show_one_comment($qobj, $q, $mq, $user, $details) {
+    $sobj = aparse($qobj, $user);
+    grade($qobj, $sobj); // annotate with score
+    
+    echo "<div class='multiquestion";
+    if (isset($details)) echo " submitted";
+    echo "' id='q-$user'>$mq[text]";
+    showQuestion($q, $quizid, $user, $user, $qobj['comments']
+        ,$mq['text']
+        ,isset($sobj[$q['slug']]) ? $sobj[$q['slug']]
+            : array('answer'=>array(),'comments'=>'')
+        ,true
+        ,$hist
+        ,true
+        ,false
+        );
+    $score = isset($sobj[$q['slug']]['score']) ? $sobj[$q['slug']]['score'] : 0;
+    if ($q['points']) $score /= $q['points'];
+    $rawscore = $score;
+    $feedback = '';
+    if (isset($details['grade'])) $score = $details['grade'];
+    if (isset($details['feedback'])) $feedback = $details['feedback'];
+    
+    echo "<p>Points: <input type='text' id='a-$user' value='$score' onchange='setComment(\"$user\")' rawscore='$rawscore' onkeydown='pending(\"$user\")'/></p>";
+    
+    echo "<div class='tinput'><span>Feedback:</span><textarea id='r-$user' onchange='setComment(\"$user\")' onkeydown='pending(\"$user\")'";
+    echo ">";
+    echo htmlentities($feedback);
+    echo "</textarea></div>";
+
+    if (!isset($details))
+        echo "<input type='button' onclick='setComment(\"$user\")' id='delme-$user' value='no reply needed'/>";
+
+    echo '</div>';
+}
+
+function show_random_comment($quizid, $q, $mq, $only_ungraded=TRUE) {
+    $qobj = qparse($quizid)
+    $hist = histogram($qobj)
+    $all_comments = get_comments($quizid, $q['slug'])
+    $users = array_keys($all_comments)
+    shuffle($users)
+
+    $found_one = FALSE;
+    $which_user = NULL;
+
+    foreach ($users as $user) {
+        $details = $all_comments[user]
+        if (!$only_ungraded || (isset($details['feedback']) || isset($details['grade']))) {
+            show_one_comment($quiz_id, $q, $mq, $user, $details);
+            $which_user = $user;
+            $found_one = TRUE;
+            break;
+        }
+    }
+
+    if (!$found_one) {
+        echo("<p>No more ".($only_ungraded ? "to grade":"")." for this question.</p>");
+    } else {
+        echo("<p><input type='button' onclick='setComment(\"$which_user\"); location.href=location.href;' value='submit and next random'/>";
+    }
+}
 
 function show_comments($quizid, $q, $mq) {
     $qobj = qparse($quizid);
     $hist = histogram($qobj);
     
     foreach(get_comments($quizid, $q['slug']) as $user=>$details) {
-        $sobj = aparse($qobj, $user);
-        grade($qobj, $sobj); // annotate with score
-        
-        echo "<div class='multiquestion";
-        if (isset($details)) echo " submitted";
-        echo "' id='q-$user'>$mq[text]";
-        showQuestion($q, $quizid, $user, $user, $qobj['comments']
-            ,$mq['text']
-            ,isset($sobj[$q['slug']]) ? $sobj[$q['slug']]
-                : array('answer'=>array(),'comments'=>'')
-            ,true
-            ,$hist
-            ,true
-            ,false
-            );
-        $score = isset($sobj[$q['slug']]['score']) ? $sobj[$q['slug']]['score'] : 0;
-        if ($q['points']) $score /= $q['points'];
-        $rawscore = $score;
-        $feedback = '';
-        if (isset($details['grade'])) $score = $details['grade'];
-        if (isset($details['feedback'])) $feedback = $details['feedback'];
-        
-        echo "<p>Points: <input type='text' id='a-$user' value='$score' onchange='setComment(\"$user\")' rawscore='$rawscore' onkeydown='pending(\"$user\")'/></p>";
-        
-        echo "<div class='tinput'><span>Feedback:</span><textarea id='r-$user' onchange='setComment(\"$user\")' onkeydown='pending(\"$user\")'";
-        echo ">";
-        echo htmlentities($feedback);
-        echo "</textarea></div>";
-
-        if (!isset($details))
-            echo "<input type='button' onclick='setComment(\"$user\")' id='delme-$user' value='no reply needed'/>";
-
-        echo '</div>';
+        show_one_comment($qobj, $q, $mq, $user, $details);
     }
     ?><script>
         document.querySelectorAll('textarea').forEach(x => {
@@ -308,6 +338,8 @@ if (isset($_GET['qid']) && !isset(($qobj = qparse($_GET['qid']))['error'])) {
             show_blanks($_GET['qid'], $questions[$_GET['slug']], $mqs[$_GET['slug']]);
         } else if ($_GET['kind'] == 'comment') {
             show_comments($_GET['qid'], $questions[$_GET['slug']], $mqs[$_GET['slug']]);
+        } else if ($_GET['kind'] == 'random-comment') {
+            show_random_comment($_GET['qid'], $questions[$_GET['slug']], $mqs[$_GET['slug']]);
         } else if ($_GET['kind'] == 'rubric') {
             show_rubric($_GET['qid'], $questions[$_GET['slug']], $mqs[$_GET['slug']]);
         } else {
@@ -362,7 +394,9 @@ echo "<script>console.log(".json_encode(array_keys($rev)).")</script>";
             echo "<tr><td>regrade</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>$slug</a></td><td>0 of $num</td><td>".$questions[$slug]['text']."</td></tr>\n";
         }
         foreach($rev as $slug=>$val) if (strlen($slug) == 8) {
-            echo "<tr><td>comment</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>$slug</a></td><td";
+            echo "<tr><td>comment</td><td>$slug: <a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>all</a>";
+            echo "or <a href'?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment-random'>random one at a time</a>";
+            echo "</td><td";
             $of = count($val);
 
             $sheet = get_comments($qobj['slug'], $slug);
