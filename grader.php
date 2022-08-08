@@ -174,17 +174,17 @@ function show_one_comment($qobj, $q, $mq, $user, $details) {
 }
 
 function show_random_comment($quizid, $q, $mq, $only_ungraded=TRUE) {
-    $qobj = qparse($quizid)
-    $hist = histogram($qobj)
-    $all_comments = get_comments($quizid, $q['slug'])
-    $users = array_keys($all_comments)
-    shuffle($users)
+    $qobj = qparse($quizid);
+    $hist = histogram($qobj);
+    $all_comments = get_comments($quizid, $q['slug']);
+    $users = array_keys($all_comments);
+    shuffle($users);
 
     $found_one = FALSE;
     $which_user = NULL;
 
     foreach ($users as $user) {
-        $details = $all_comments[user]
+        $details = $all_comments[user];
         if (!$only_ungraded || (isset($details['feedback']) || isset($details['grade']))) {
             show_one_comment($quiz_id, $q, $mq, $user, $details);
             $which_user = $user;
@@ -196,7 +196,7 @@ function show_random_comment($quizid, $q, $mq, $only_ungraded=TRUE) {
     if (!$found_one) {
         echo("<p>No more ".($only_ungraded ? "to grade":"")." for this question.</p>");
     } else {
-        echo("<p><input type='button' onclick='setComment(\"$which_user\"); location.href=location.href;' value='submit and next random'/>";
+        echo("<p><input type='button' onclick='setComment(\"$which_user\"); location.href=location.href;' value='submit and next random'/>");
     }
 }
 

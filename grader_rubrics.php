@@ -32,7 +32,7 @@ echo "<script>console.log('pending',".json_encode($users).");</script>";
         $ans[$user] = array(
             "submitted" => $q['type'] == 'image' 
                 ? file_exists("log/$quizid/$user-$slug") 
-                : null,
+                : $sobj[$slug]['answer'],
             "comments" => isset($sobj[$slug]['comments']) ? $sobj[$slug]['comments'] : null,
             "graded" => isset($sobj[$slug]['rubric']) ? $sobj[$slug]['rubric'] : null,
             "feedback" => isset($sobj[$slug]['feedback']) ? $sobj[$slug]['feedback'] : null,
@@ -164,15 +164,18 @@ function show_rubric($quizid, $q, $mq) {
         if (!$details['submitted'] && !$details['comments']) continue;
         echo "<div class='grade1' id='$student'><div class='submission'>";
         $ans = $details['submitted'];
-//echo "<pre>".__LINE__." ".json_encode($details)."</pre>";
+        //echo "<pre>".__LINE__." ".json_encode($details)."</pre>";
         if (!$ans) echo '<em>(student left answer blank)</em>';
         else if ($ans === true)
             echo "<a onclick='reveal(\"$student\")'>view image</a>";
         else {
-            echo '<div class="answer">';
-            if (isset($slug2html[$ans])) echo $slug2html[$ans];
-            else echo htmlentities($ans);
-            echo '</div>';
+            assert(is_array($ans));
+            foreach ($ans as $ans_item) {
+                echo '<div class="answer">';
+                if (isset($slug2html[$ans_item])) echo $slug2html[$ans_item];
+                else echo htmlentities($ans_item);
+                echo '</div>';
+            }
         }
         if ($details['comments'])
             echo '<textarea disabled="disabled">'.htmlentities($details['comments']).'</textarea>';
