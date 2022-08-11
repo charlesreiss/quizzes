@@ -103,6 +103,8 @@ function tick() {
     if (remaining < 0) {
         clock.innerHTML = "Time is up; further changes will be ignored";
         clearInterval(timer);
+    } else if (remaining > 60 * 60 * 24 * 365) {
+        clock.style.display = 'none';
     } else {
         remaining /= 1000; remaining = Math.floor(remaining); // milliseconds -> seconds;
         var seconds = remaining % 60;
