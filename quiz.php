@@ -37,14 +37,19 @@ function pending(num) {
     if (document.getElementById('q'+num).className != "question submitting")
         document.getElementById('q'+num).className = "question submitting";
 }
+var sequence = 0;
 function postAns(name, num) {
     document.getElementById('q'+num).className = "question submitting";
     var ans = {
         'user':"<?php echo $user; ?>", 
+        'realuser':"<?php echo $realuser; ?>", 
+        'session_id':"<?php echo make_or_get_session($user, $_GET['qid'])?>",
         'quiz':name,
         'slug':document.getElementById("q"+num).getAttribute('slug'), 
-        'answer':[]
+        'answer':[],
+        'sequence':sequence,
     };
+    sequence = sequence + 1;
     var elems = document.getElementsByName("ans"+num);
     for(var i=0; i<elems.length; i+=1) {
         var elem = elems[i];
@@ -69,7 +74,7 @@ function ajaxSend(data, num) {
     if (!("withCredentials" in xhr)) {
         return null;
     }
-    xhr.open("POST", "quiz_listener.php<?php
+    xhr.open("POST", "<?php echo listener_url() ?><?php
     if (isset($_GET['asuser'])) echo '?asuser='.$_GET['asuser'];
     ?>", true);
     xhr.withCredentials = true;

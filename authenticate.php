@@ -17,6 +17,7 @@ if (php_sapi_name() == "cli") { // let run from commandline for testing
     $isstaff = in_array($user, $metadata['staff']);
     $realisstaff = $isstaff;
 }
+$realuser = $user;
 if ($isstaff && array_key_exists('asuser', $_GET)) {
     $user = basename($_GET['asuser']); // remove slashes
     $isstaff = in_array($user, $metadata['staff']);

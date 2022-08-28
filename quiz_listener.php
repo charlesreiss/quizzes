@@ -33,10 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
     $data = json_decode(file_get_contents("php://input"), true);
     if (!$data || $data['user'] != $user) {
-        if ($isstaff) $user = $data['user'];
-        else {
+        if ($isstaff) {
+            $user = $data['user'];
+        } else if (!$user && $data['session_id'] && check_session($data['user'], $data['quiz'], $data['session_id'])) {
+            $user = $data['user'];
+        } else {
             http_response_code(403);
-            echo 'user '.$user.' sent as '.$data['user'];
+            echo 'user '.$user.' sent as '.$data['user'].' (could not authenticate '.$data['session_id'].')';
             exit;
         }
     } 
