@@ -205,6 +205,7 @@ function qparse($qid,$abspath=FALSE) {
         
         $ans = isset($metadata['defaults']) ? $metadata['defaults'] : array();
         $ans += array( // defaults
+            "quizid" => $qid,
             "title"=>"$metadata[quizname] $qid",
             "seconds"=>0,
             "open"=>strtotime("2999-12-31 12:00"),
@@ -509,7 +510,7 @@ function aparse($qobj, $sid) {
             if ($obj === null) continue;
             if (isset($obj['feedback'])) { // grader action
                 $slug = $obj['slug'];
-                if (isset($obj['grade'])) $ans[$slug]['grade'] = $obj['grade'];
+                if (isset($obj['grade']) && $obj['grade'] != '') $ans[$slug]['grade'] = $obj['grade'];
                 if (isset($obj['rubric'])) $ans[$slug]['rubric'] = $obj['rubric'];
                 if (isset($obj['date']) && !isset($ans['start']))
                     $ans['start'] = strtotime($obj['date']);
@@ -519,6 +520,9 @@ function aparse($qobj, $sid) {
                         'text'=>$obj['feedback'],
                         'date'=>$obj['date'],
                     );
+                    if (isset($obj['grade'])) {
+                        $entry['grade'] = $obj['grade'];
+                    }
                     if (isset($ans[$obj['slug']]['regrade'])) { // new
                         $ans[$obj['slug']]['chat'][] = $entry;
                         unset($ans[$obj['slug']]['regrade']);
@@ -526,7 +530,9 @@ function aparse($qobj, $sid) {
                         $ans[$obj['slug']]['chat'][count($ans[$obj['slug']]['chat'])-1] = $entry;
                     }
                 } else {
-                    $ans[$slug]['feedback'] = $obj['feedback'];
+                    if ($obj['feedback'] != "") {
+                        $ans[$slug]['feedback'] = $obj['feedback'];
+                    }
                 }
             } else if (isset($obj['upload-to'])) { // upload action
                 // invalidates previous grades
@@ -647,6 +653,7 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
         $earn = $sobj[$slug]['grade'];
     }
     
+    $reply = FALSE;
     if (isset($q['rubric'])) {
 
         if (!isset($sobj[$slug]['rubric'])) {
@@ -694,8 +701,12 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     $obj = json_decode(file_get_contents("log/$q[quizid]/key_$slug.json"), true);
                     if (isset($obj[$resp]) && is_numeric($obj[$resp]))
                         $earn = $obj[$resp];
+                    if (isset($obj[$resp]) && isset($obj[$resp]['grade']))
+                        $earn = $obj[$resp]['grade'];
+                    if (isset($obj[$resp]) && isset($obj[$resp]['reply']))
+                        $reply = $obj[$resp]['reply'];
                 }
-                if ($review !== FALSE && round($earn,6) != 1 && $resp) {
+                if ($review !== FALSE && $resp) {
                     if (!isset($review["$slug-answers"]))
                         $review["$slug-answers"] = array();
                     if (isset($review["$slug-answers"][$resp]))
@@ -703,8 +714,14 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     else
                         $review["$slug-answers"][$resp] = array($sobj['slug']);
                 }
-                if ($review !== FALSE && round($earn,6) != 1 && $sobj[$slug]['comments'])
-                    $review[$slug][] = $sobj['slug'];
+                if ($review !== FALSE && $sobj[$slug]['comments']) {
+                    if (!isset($review[$slug])) {
+                        $review[$slug] = array();
+                    }
+                    $review[$slug][$sobj['slug']] = array(
+                        "pregrade" => $earn,
+                    );
+                }
             }
         }
         if ($hist !== FALSE) {
@@ -731,15 +748,31 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                         else
                             $hist[$slug][$opt['slug']] = 1;
                 }
-            if ($review !== FALSE && round($earn,6) != 1 
-            && ($sobj[$slug]['comments']))
-                $review[$slug][] = $sobj['slug'];
+            if ($review !== FALSE
+            && ($sobj[$slug]['comments'])) {
+                if (!isset($review[$slug])) {
+                    $review[$slug] = array();
+                }
+                $review[$slug][$sobj['slug']] = array(
+                    "pregrade" => $earn
+                );
+            }
         }
     }
-    if ($review !== FALSE && isset($sobj[$slug]['regrade']))
-        $review[$slug][] = $sobj['slug'];
+    if ($review !== FALSE && isset($sobj[$slug]['regrade'])) {
+        if (!isset($review[$slug])) {
+            $review[$slug] = array();
+        }
+        if (!isset($review[$slug][$sobj['slug']])) {
+            $review[$slug][$sobj['slug']] = array();
+        } 
+        $review[$slug][$sobj['slug']]['regrade'] = true;
+    }
         
     $sobj[$slug]['score'] = round($earn*$q['points'], 6);
+    if ($reply !== FALSE && !isset($sobj[$slug]['feedback'])) {
+        $sobj[$slug]['feedback'] = $reply;
+    }
     if ($hist !== FALSE) {
         $hist[$slug]['right'] += $sobj[$slug]['score'];
         $hist[$slug]['total'] += 1;
@@ -905,7 +938,7 @@ function fractionOf($num) {
     return ' ';
 }
 
-function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=false, $replied=array(), $disable=false, $hist=false, $ajax=true, $unshuffle=false, $regrades=false, $printmode=false){
+function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=false, $replied=array(), $disable=false, $hist=false, $ajax=true, $unshuffle=false, $regrades=false, $printmode=false, $showchat=false){
     global $metadata, $realisstaff;
     $postcall = "postAns(".htmlspecialchars(json_encode($quizid)).", $qnum)";
     
@@ -1073,18 +1106,21 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
         echo "</textarea></div>";
     }
     
-    if ($hist && isset($replied['feedback'])
+    if (($hist || $showchat) && isset($replied['feedback'])
     && ($replied['feedback'] || (isset($replied['grade']) && is_numeric($replied['grade'])))) {
         echo "<blockquote style='white-space: pre-wrap;'>";
-        echo toHTML("**Feedback**: $replied[feedback]" . (is_numeric($replied['grade']) ? " (grade set to ".round($replied['grade']*100,0)."%)" : '')); // cache this in grader_listener??
+        echo toHTML("**Feedback**: $replied[feedback]" . (is_numeric($replied['grade']) ? " _(grade set to ".round($replied['grade']*100,0)."%)_" : '')); // cache this in grader_listener??
         echo "</blockquote>";
     }
     
-    if ($hist && isset($replied['chat'])) {
+    if (($hist || $showchat) && isset($replied['chat'])) {
         echo "<blockquote class='chat'>Regrade conversation:<dl>\n";
         foreach($replied['chat'] as $entry) {
             echo "<dt>$entry[from] <small>($entry[date])</small></dt><dd>";
             echo htmlspecialchars($entry['text']);
+            if (isset($entry['grade'])) {
+                echo ' <em>(grade set to '.(100 * floatval($entry['grade'])).'%)</em>';
+            }
             echo "</dd>\n";
         }
         echo "</dl></blockquote>";
