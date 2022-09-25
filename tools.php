@@ -492,7 +492,7 @@ function qparse($qid,$abspath=FALSE) {
 }
 
 $_aparse = array();
-function aparse($qobj, $sid) {
+function aparse($qobj, $sid, $time_cutoff=FALSE) {
     global $_aparse;
     if (is_array($sid)) return $sid;
     if (is_string($qobj)) $qobj = qparse($qobj);
@@ -570,6 +570,11 @@ function aparse($qobj, $sid) {
                     $ans[$obj['slug']]['regrade'] = true;
                 }
             } else { // student action
+                if ($time_cutoff !== FALSE) {
+                    if (isset($obj['date']) && strtotime($obj['date']) > $time_cutoff) {
+                        continue;
+                    }
+                }
                 if (isset($obj['answer'])) { // student answer
                     $show = array('answer'=>$obj['answer']);
                     if (isset($obj['comments']))
@@ -1109,7 +1114,7 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
     if (($hist || $showchat) && isset($replied['feedback'])
     && ($replied['feedback'] || (isset($replied['grade']) && is_numeric($replied['grade'])))) {
         echo "<blockquote style='white-space: pre-wrap;'>";
-        echo toHTML("**Feedback**: $replied[feedback]" . (is_numeric($replied['grade']) ? " _(grade set to ".round($replied['grade']*100,0)."%)_" : '')); // cache this in grader_listener??
+        echo toHTML("**Feedback**: $replied[feedback]" . (isset($replied['grade']) && is_numeric($replied['grade']) ? " _(grade set to ".round($replied['grade']*100,0)."%)_" : '')); // cache this in grader_listener??
         echo "</blockquote>";
     }
     
@@ -1118,7 +1123,7 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
         foreach($replied['chat'] as $entry) {
             echo "<dt>$entry[from] <small>($entry[date])</small></dt><dd>";
             echo htmlspecialchars($entry['text']);
-            if (isset($entry['grade'])) {
+            if (isset($entry['grade']) && is_numeric($entry['grade'])) {
                 echo ' <em>(grade set to '.(100 * floatval($entry['grade'])).'%)</em>';
             }
             echo "</dd>\n";
