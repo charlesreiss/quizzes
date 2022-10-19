@@ -366,6 +366,7 @@ function qparse($qid,$abspath=FALSE) {
                     if ($bit[0] == '*') { $sign = 1; $bit = substr($bit,1); }
                     if ($bit[0] == 'h') $opt['points'] = $sign * 0.5;
                     else if ($bit[0] == 'x' || $bit[0] == 'X') $opt['points'] = 0;
+                    else if ($bit[0] == 'Y') { $opt['points'] = 1; $opt['any-answer'] = 1; $opt['original-sign'] = $sign; }
                     else if ($bit[0] == 'w') $opt['points'] = $sign * floatval('0'.substr($bit,1));
                     else $opt['points'] = $sign;
                 }
@@ -729,10 +730,6 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                 }
             }
         }
-        if ($hist !== FALSE) {
-            $hist[$slug]['right'] += $earn;
-            $hist[$slug]['total'] += 1;
-        }
     } else {
         // assert(isset($q['options']));
         if ($hist !== FALSE && !isset($hist[$slug]))
@@ -741,18 +738,23 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
         if (isset($sobj[$slug]['answer'])) {
             $resp = $sobj[$slug]['answer'];
 //error_log(json_encode($resp));
-            foreach($q['options'] as $opt)
-                if (in_array($opt['slug'],$resp)) {
-                    if (!$graded) {
+            foreach($q['options'] as $opt) {
+                if (!$graded) {
+                    if (array_key_exists('any-answer', $opt) && $opt['any-answer']) {
+                        $earn += abs($opt['points']);
+                    } else if (in_array($opt['slug'],$resp)) {
                         if ($q['type'] == 'checkbox') $earn += $opt['points'];
                         else $earn = max($earn, $opt['points']);
                     }
+                }
+                if (in_array($opt['slug'],$resp)) {
                     if ($hist !== FALSE)
                         if (isset($hist[$slug][$opt['slug']]))
                             $hist[$slug][$opt['slug']] += 1;
                         else
                             $hist[$slug][$opt['slug']] = 1;
-                }
+                } 
+            }
             if ($review !== FALSE
             && ($sobj[$slug]['comments'])) {
                 if (!isset($review[$slug])) {
@@ -1030,10 +1032,15 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
                     echo "</div>";
                 }
                 echo "<div style='flex-basis: 1.5em; text-align:right; flex-grow:0; flex-shrink:0; color:green;'>";
-                if ($q['type'] == 'checkbox') echo $opt['points'] > 0 ? '⊤' : '';
-                else echo $metadata['detailed-partial'] 
-                    ? fractionOf($opt['points']) 
-                    : ($opt['points'] == 1 ? '⊤' : ($opt['points'] > 0 ? '½' : ''));
+                if (array_key_exists('any-answer', $opt)) {
+                    if ($q['type'] == 'checkbox') echo $opt['original-sign'] > 0 ? '⊤' : '';
+                    echo ' (accepted any answer)';
+                } else {
+                    if ($q['type'] == 'checkbox') echo $opt['points'] > 0 ? '⊤' : '';
+                    else echo $metadata['detailed-partial'] 
+                        ? fractionOf($opt['points']) 
+                        : ($opt['points'] == 1 ? '⊤' : ($opt['points'] > 0 ? '½' : ''));
+                }
                 echo "</div>";
             }
             echo "<input type='$q[type]' name='ans$qnum' value='$opt[slug]' $subm";
