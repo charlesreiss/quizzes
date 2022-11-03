@@ -157,15 +157,19 @@ function katexify_display($txt) {
 /// time consuming because of the katex calls, but only if there is math in the page (otherwise quite fast)
 function toHTML($md) {
     global $metadata;
-    $md = preg_replace_callback('/\$\$(.*?)\$\$/s', 'katexify_display', $md);
-    $md = preg_replace_callback('/\$([^\n]*?)\$/s', 'katexify_inline', $md);
-    $html = MarkdownExtra::defaultTransform($md);
-    if (!$metadata['server-side KaTeX']) {
-        $html = preg_replace('/(<span class="mymath">)<code>(.*?)<\/code>(<\/span>)/s', '$1$2$3', $html);
-        $html = preg_replace('/(<div class="mymath">)<code>(.*?)<\/code>(<\/div>)/s', '$1$2$3', $html);
+    if (!$metadata['disable-katex']) {
+        $md = preg_replace_callback('/\$\$(.*?)\$\$/s', 'katexify_display', $md);
+        $md = preg_replace_callback('/\$([^\n]*?)\$/s', 'katexify_inline', $md);
     }
-    $html = preg_replace_callback('/\&#92;\[(.*?)\&#92;\]/s', 'katexify_display', $html);
-    $html = preg_replace_callback('/\&#92;\((.*?)\&#92;\)/s', 'katexify_inline2', $html);
+    $html = MarkdownExtra::defaultTransform($md);
+    if (!$metadata['disable-katex']) {
+        if (!$metadata['server-side KaTeX']) {
+            $html = preg_replace('/(<span class="mymath">)<code>(.*?)<\/code>(<\/span>)/s', '$1$2$3', $html);
+            $html = preg_replace('/(<div class="mymath">)<code>(.*?)<\/code>(<\/div>)/s', '$1$2$3', $html);
+        }
+        $html = preg_replace_callback('/\&#92;\[(.*?)\&#92;\]/s', 'katexify_display', $html);
+        $html = preg_replace_callback('/\&#92;\((.*?)\&#92;\)/s', 'katexify_inline2', $html);
+    }
     return $html;
 }
 function toInlineHTML($md) {
