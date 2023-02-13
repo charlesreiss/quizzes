@@ -283,13 +283,22 @@ function qparse($qid,$abspath=FALSE) {
             }
             if ($is_oexp) {
                 if ($opt !== FALSE) {
+                    if (isset($opt['explain'])) {
+                        $opt['explain'] = $opt['explain'] . "\n" . substr($line,4);
+                    } else {
+                        $opt['explain'] = substr($line,4);
+                    }
                     $opt['explain'] = substr($line,4);
                     continue;
                 } else { $is_text = true; }
             }
             if ($is_qexp) {
                 if ($q !== FALSE) {
-                    $q['explain'] = substr($line,4);
+                    if (isset($q['explain'])) {
+                        $q['explain'] = $q['explain'] . "\n" . substr($line,4);
+                    } else {
+                        $q['explain'] = substr($line,4);
+                    }
                     continue;
                 } else { $is_text = true; }
             }
