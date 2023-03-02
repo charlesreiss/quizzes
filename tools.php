@@ -337,7 +337,11 @@ function qparse($qid,$abspath=FALSE) {
             }
             if ($is_option) { // parse multiple-choice option text
                 $bit = explode(' ',$line,2);
-                $opt = array('text'=>$bit[1]);
+                if (count($bit) > 1) {
+                    $opt = array('text'=>$bit[1]);
+                } else {
+                    $opt = array('text'=>'');
+                }
                 $bit = $bit[0];
                 $opt['hide'] = ($bit[0] == 'x' || $bit[1] == 'x');
                 if (isset($q['rubric'])) {
