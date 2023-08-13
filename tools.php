@@ -46,6 +46,10 @@ function debug_dump(...$args) {
     echo "\n)</script>";
 }
 
+function now_timestamp() {
+    return date('c');
+}
+
 
 function beginsWith($haystack, $needle) {
     return 0 === strncasecmp($haystack, $needle, strlen($needle));

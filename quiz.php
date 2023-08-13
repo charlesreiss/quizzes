@@ -166,7 +166,7 @@ function imgup() {
                 case '⊥': $rot += 90;
                 case '⊢': $rot += 90;
 
-                putlog("$_GET[qid]/$user.log", '{"date":"'.date('Y-m-d H:i:s').'","rotation":'.$rot.'}'."\n");
+                putlog("$_GET[qid]/$user.log", '{"date":"'.now_timestamp().'","rotation":'.$rot.'}'."\n");
                 if ($mime == 'image/jpeg') {
                     exec("jpegtran -rotate $rot -outfile $img $img", $stdout, $retval);
                 } else if ($mime == 'image/png') {
@@ -249,7 +249,7 @@ function imgup() {
             }
             
             putlog("$_GET[qid]/$user.log", json_encode(array(
-                "date"=>date('Y-m-d H:i:s'),
+                "date"=>now_timestamp(),
                 "upload-to" => $slug,
                 "upload-from" => $name
             ))."\n");
@@ -312,19 +312,19 @@ function newRegrade($qid) {
     putlog("$qid/$user.log", json_encode(array(
         'slug'=>$_POST['regrade'],
         'request'=>$_POST['request'],
-        'date'=>date('Y-m-d H:i:s'),
+        'date'=>now_timestamp(),
     ))."\n");
 
     putlog("$qid/regrades.log", json_encode(array(
         'student'=>$user,
         'task'=>$_POST['regrade'],
         'add'=>true,
-        'date'=>date('Y-m-d H:i:s'),
+        'date'=>now_timestamp(),
     ))."\n");
 
     // if a rubric, also post a rubric clear action
     if (file_exists("log/$qid/gradelog_$_POST[regrade].lines"))
-        putlog("$qid/gradelog_$_POST[regrade].lines", "$user\tnull\t\"\"\t".date('Y-m-d H:i:s')."\t$_SERVER[PHP_AUTH_USER]\n");
+        putlog("$qid/gradelog_$_POST[regrade].lines", "$user\tnull\t\"\"\t".now_timestamp()."\t$_SERVER[PHP_AUTH_USER]\n");
     
     echo "<pre>Regrade request recorded. It may take a week or two for a response.</pre>"; return; 
 }
@@ -346,7 +346,7 @@ function showQuiz($qid, $blank = false) {
     
     
     if ($sobj['may_submit'] && !$sobj['started'] && ($user == $_SERVER['PHP_AUTH_USER']))
-        putLog("$qid/$user.log", '{"date":"'.date('Y-m-d H:i:s').'"}'."\n");
+        putLog("$qid/$user.log", '{"date":"'.now_timestamp().'"}'."\n");
     if ($sobj['may_submit'])
         echo "<div id='clock'>$sobj[time_left]</div>";
 
@@ -407,7 +407,7 @@ function showQuiz($qid, $blank = false) {
         } else if (file_exists("log/$qid/$user.log")) {
             $tmp = aparse("$qid","$user")['start'];
             echo "<div>$user did open this quiz, first viewing it at ";
-            echo date('Y-m-d H:i:s', $tmp);
+            echo date('c', $tmp);
             echo"; <a href='?qid=$qid&asuser=$user&archive=$user'>archive it and remove its grade</a></div>";
         } else {
             echo "<div>$user did not submit this quiz.</div>";
