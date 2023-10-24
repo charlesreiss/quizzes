@@ -781,6 +781,14 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     "pregrade" => $earn
                 );
             }
+        } else {
+            foreach($q['options'] as $opt) {
+                if (!$graded) {
+                    if (array_key_exists('any-answer', $opt) && $opt['any-answer']) {
+                        $earn += abs($opt['points']);
+                    }
+                }
+            }
         }
     }
     if ($review !== FALSE && isset($sobj[$slug]['regrade'])) {
