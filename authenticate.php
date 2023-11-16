@@ -13,7 +13,11 @@ if (php_sapi_name() == "cli") { // let run from commandline for testing
     $isstaff = true;
     $realisstaff = $isstaff;
 } else {
-    $user = $_SERVER['PHP_AUTH_USER'];
+    if (array_key_exists('PHP_AUTH_USER', $_SERVER)) {
+        $user = $_SERVER['PHP_AUTH_USER'];
+    } else {
+        $user = "__NONE__";
+    }
     $isstaff = in_array($user, $metadata['staff']);
     $realisstaff = $isstaff;
 }
