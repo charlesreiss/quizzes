@@ -714,7 +714,11 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
         if (!$graded) {
             $earn = 0;
             if (isset($sobj[$slug])) {
-                $resp = trim($sobj[$slug]['answer'][0]);
+                if (array_key_exists('answer', $sobj[$slug])) {
+                    $resp = trim($sobj[$slug]['answer'][0]);
+                } else {
+                    $resp = '';
+                }
                 foreach($q['key'] as $key) {
                     $k = $key['text'];
                     $match = ($k[0] == '/') ? preg_match($k, $resp) : $k == $resp;
@@ -737,7 +741,7 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     else
                         $review["$slug-answers"][$resp] = array($sobj['slug']);
                 }
-                if ($review !== FALSE && $sobj[$slug]['comments']) {
+                if ($review !== FALSE && array_key_exists('comments', $sobj[$slug]) && $sobj[$slug]['comments']) {
                     if (!isset($review[$slug])) {
                         $review[$slug] = array();
                     }
