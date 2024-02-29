@@ -1062,15 +1062,15 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
                 }
                 echo "<div style='flex-basis: 1.5em; text-align:right; flex-grow:0; flex-shrink:0; color:green;'>";
                 if (array_key_exists('any-answer', $opt)) {
-                    if ($q['type'] == 'checkbox') echo $opt['original-sign'] > 0 ? '⊤' : '';
-                    echo ' (accepted any answer)';
+                    if ($q['type'] == 'checkbox') echo $opt['original-sign'] > 0 ? '⊤ (correct)' : '';
+                    echo ' (gave credit for any answer)';
                 } else if (array_key_exists('radio-drop', $opt)) {
-                    echo ' (accepted but not best answer)';
+                    echo ' (gave credit but not best answer)';
                 } else {
-                    if ($q['type'] == 'checkbox') echo $opt['points'] > 0 ? '⊤' : '';
+                    if ($q['type'] == 'checkbox') echo $opt['points'] > 0 ? '⊤ (correct)' : '';
                     else echo $metadata['detailed-partial'] 
                         ? fractionOf($opt['points']) 
-                        : ($opt['points'] == 1 ? '⊤' : ($opt['points'] > 0 ? '½' : ''));
+                        : ($opt['points'] == 1 ? '⊤ (correct)' : ($opt['points'] > 0 ? '½ (partial credit)' : ''));
                 }
                 echo "</div>";
             }
