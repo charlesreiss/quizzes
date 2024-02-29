@@ -371,7 +371,7 @@ function qparse($qid,$abspath=FALSE) {
                     if ($bit[0] == 'h') $opt['points'] = 0.5;
                     else if ($bit[0] == 'w') $opt['points'] = floatval('0'.substr($bit,1));
                     else if ($bit[0] == '*') $opt['points'] = 1.0;
-                    else if ($bit[0] == 'x' || $bit[0] == 'X') $opt['points'] = 1; // fixme?
+                    else if ($bit[0] == 'x' || $bit[0] == 'X') {$opt['points'] = 1; $opt['radio-drop'] = 1;} // fixme?
                     else $opt['points'] = 0;
                 } else { // checkbox
                     // *a. select this, full weight
@@ -1064,6 +1064,8 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
                 if (array_key_exists('any-answer', $opt)) {
                     if ($q['type'] == 'checkbox') echo $opt['original-sign'] > 0 ? '⊤' : '';
                     echo ' (accepted any answer)';
+                } else if (array_key_exists('radio-drop', $opt)) {
+                    echo ' (accepted but not best answer)';
                 } else {
                     if ($q['type'] == 'checkbox') echo $opt['points'] > 0 ? '⊤' : '';
                     else echo $metadata['detailed-partial'] 

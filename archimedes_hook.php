@@ -98,10 +98,10 @@ function post_grades($prefix, $special=array()) {
         }
         
         file_put_contents_recursive("$dir.rubric",  json_encode(array(
-            "kind"=>"hybrid",
+            "kind"=>"rubric",
             "late-penalty"=>1,
             "auto-weight"=>0,
-            "human"=>$rubrics[$qid],
+            "items"=>$rubrics[$qid],
         )));
         
         foreach($users as $user=>$human) {
@@ -115,12 +115,8 @@ function post_grades($prefix, $special=array()) {
             } else {
                 file_put_contents_recursive("$dir$user/.grade",
                 json_encode(array(
-                    "kind"=>"hybrid",
-                    "auto"=>1,
-                    "auto-late"=>1,
-                    "late-penalty"=>1,
-                    "auto-weight"=>0,
-                    "human"=>$human,
+                    "kind"=>"rubric",
+                    "items"=>$human,
                     "comments"=>"see the quizzing site for details",
                 )));
             }
