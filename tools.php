@@ -440,6 +440,9 @@ function qparse($qid,$abspath=FALSE) {
                     'text'=>'',
                     'pin'=> stripos($line, 'pin') !== FALSE,
                 );
+                if (stripos($line,'grade-in-comments')) {
+                    $q['grade-in-comments'] = true;
+                }
                 if (stripos($line, 'box(')) {
                     $boxpos1 = stripos($line, 'box(')+4;
                     $boxpos2 = stripos($line, ')', $boxpos);
@@ -741,7 +744,7 @@ function gradeQuestion($q, &$sobj, &$review=FALSE, &$hist=FALSE) {
                     else
                         $review["$slug-answers"][$resp] = array($sobj['slug']);
                 }
-                if ($review !== FALSE && array_key_exists('comments', $sobj[$slug]) && $sobj[$slug]['comments']) {
+                if ($review !== FALSE && ((array_key_exists('comments', $sobj[$slug]) && $sobj[$slug]['comments']) || isset($q['grade-in-comments']))) {
                     if (!isset($review[$slug])) {
                         $review[$slug] = array();
                     }
