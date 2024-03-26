@@ -443,6 +443,9 @@ function qparse($qid,$abspath=FALSE) {
                 if (stripos($line,'grade-in-comments')) {
                     $q['grade-in-comments'] = true;
                 }
+                if (stripos($line,'context-previous')) {
+                    $q['context-previous'] = true;
+                }
                 if (stripos($line, 'box(')) {
                     $boxpos1 = stripos($line, 'box(')+4;
                     $boxpos2 = stripos($line, ')', $boxpos);
@@ -466,6 +469,7 @@ function qparse($qid,$abspath=FALSE) {
         
         // post-process: re-weight points and assign slugs
         $qn = 0;
+        $previous_slug = FALSE;
         foreach($all as &$mq) {
             foreach($mq['q'] as &$q) {
                 $qn += 1;
@@ -493,6 +497,10 @@ function qparse($qid,$abspath=FALSE) {
                 } else {
                     $q['blank'] = 0;
                 }
+                if (isset($q['context-previous'])) {
+                    $q['show-context-slugs'] = array($previous_slug);
+                }
+                $previous_slug = $q['slug'];
             }
         }
         

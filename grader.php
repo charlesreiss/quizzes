@@ -230,6 +230,12 @@ function show_one_comment($qobj, $q, $mq, $user, $details, $hide_correct_in_key 
     $rawscore = $score;
     $feedback = '';
 
+    if (isset($q['show-context-slugs'])) {
+        foreach ($q['show-context-slugs'] as $other_slug) {
+            echo '<p>Answer to '.$other_slug.': '.htmlentities($sobj[$other_slug]['answer']).'</p>';
+        }
+    }
+
     if (isset($details['regrade']) && $details['regrade']) {
         echo '<p>This is a regrade request.</p>';
         if (isset($details['old-feedback'])) {
