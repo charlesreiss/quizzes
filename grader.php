@@ -218,7 +218,7 @@ function show_one_comment($qobj, $q, $mq, $user, $details, $hide_correct_in_key 
         ,isset($sobj[$q['slug']]) ? $sobj[$q['slug']]
             : array('answer'=>array(),'comments'=>'')
         ,true
-        ,$hist
+        ,false
         ,true
         ,false
         ,false
@@ -232,7 +232,7 @@ function show_one_comment($qobj, $q, $mq, $user, $details, $hide_correct_in_key 
 
     if (isset($q['show-context-slugs'])) {
         foreach ($q['show-context-slugs'] as $other_slug) {
-            echo '<p>Answer to '.$other_slug.': '.htmlentities($sobj[$other_slug]['answer']).'</p>';
+            echo '<p>Answer to '.$other_slug.': '.htmlentities($sobj[$other_slug]['answer'][0]).'</p>';
         }
     }
 
