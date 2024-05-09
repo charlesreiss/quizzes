@@ -223,7 +223,6 @@ function qparse($qid,$abspath=FALSE) {
             "keyless"=>false,
             "order"=>"shuffle",
             "hide"=>false,
-            "openfor"=>array(),
             "unhide"=>array(),
             "draft"=>false,
             "regrades"=>true,
@@ -246,7 +245,6 @@ function qparse($qid,$abspath=FALSE) {
             if ($k == 'minutes') { $k = 'seconds'; $v = intval(round(floatval($v)*60)); }
             if ($k == 'title') $v = toInlineHTML($v);
             if ($k == 'unhide') $v = preg_split("/[\s,;]+/", $v, -1, PREG_SPLIT_NO_EMPTY);
-            if ($k == 'openfor') $v = preg_split("/[\s,;]+/", $v, -1, PREG_SPLIT_NO_EMPTY);
             if ($v === "true") $v = true;
             if ($v === "false") $v = false;
             $ans[$k] = $v;
@@ -638,6 +636,12 @@ function aparse($qobj, $sid, $time_cutoff=FALSE) {
     if (isset($metadata['early'][$qobj['slug']][$sid])) {
         $oldopen = $qobj['open'];
         $qobj['open'] -= 60*60*24*$metadata['early'][$qobj['slug']][$sid];
+    }
+    if (isset($metadata['open'][$qobj['slug']][$sid])) {
+        $qobj['open'] = strtotime($metadata['open'][$qobj['slug']][$sid];
+    }
+    if (isset($metadata['due'][$qobj['slug']][$sid])) {
+        $qobj['due'] = strtotime($metadata['due'][$qobj['slug']][$sid];
     }
     // view any open quiz, even if time's up
     $ans['may_view'] = in_array($sid, $metadata['staff']) 
