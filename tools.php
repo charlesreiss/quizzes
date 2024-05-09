@@ -223,6 +223,7 @@ function qparse($qid,$abspath=FALSE) {
             "keyless"=>false,
             "order"=>"shuffle",
             "hide"=>false,
+            "openfor"=>array(),
             "unhide"=>array(),
             "draft"=>false,
             "regrades"=>true,
@@ -245,6 +246,7 @@ function qparse($qid,$abspath=FALSE) {
             if ($k == 'minutes') { $k = 'seconds'; $v = intval(round(floatval($v)*60)); }
             if ($k == 'title') $v = toInlineHTML($v);
             if ($k == 'unhide') $v = preg_split("/[\s,;]+/", $v, -1, PREG_SPLIT_NO_EMPTY);
+            if ($k == 'openfor') $v = preg_split("/[\s,;]+/", $v, -1, PREG_SPLIT_NO_EMPTY);
             if ($v === "true") $v = true;
             if ($v === "false") $v = false;
             $ans[$k] = $v;
