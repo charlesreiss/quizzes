@@ -638,10 +638,10 @@ function aparse($qobj, $sid, $time_cutoff=FALSE) {
         $qobj['open'] -= 60*60*24*$metadata['early'][$qobj['slug']][$sid];
     }
     if (isset($metadata['open'][$qobj['slug']][$sid])) {
-        $qobj['open'] = strtotime($metadata['open'][$qobj['slug']][$sid];
+        $qobj['open'] = strtotime($metadata['open'][$qobj['slug']][$sid]);
     }
     if (isset($metadata['due'][$qobj['slug']][$sid])) {
-        $qobj['due'] = strtotime($metadata['due'][$qobj['slug']][$sid];
+        $qobj['due'] = strtotime($metadata['due'][$qobj['slug']][$sid]);
     }
     // view any open quiz, even if time's up
     $ans['may_view'] = in_array($sid, $metadata['staff']) 
