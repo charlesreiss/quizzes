@@ -1,6 +1,13 @@
 ﻿<!DOCTYPE html>
 <?php 
 require_once "tools.php";
+if ($realisstaff && $_GET['standalone']) {
+    $standalone = TRUE;
+} else {
+    $standalone = FALSE;
+}
+
+if (!$standalone) {
 ?>
 <html>
 <head>
@@ -124,7 +131,6 @@ function tick() {
         clock.innerHTML = text;
     }
 }
-<?php } // endif !isset($_GET['view_only']) ?>
 function onload() {
     if (document.getElementById('clock')) {
         var remaining = Number(document.getElementById('clock').innerHTML);
@@ -133,6 +139,9 @@ function onload() {
     }
 }
 
+<?php } else { // endif !isset($_GET['view_only']) ?>
+function onload() {}
+<?php } ?>
     </script>
 </head>
 <body onload="onload()">
@@ -140,6 +149,7 @@ function onload() {
 if (isset($_GET['asuser'])) echo '.?asuser='.$user;
 else echo '.';
 ?>" style="text-align:center; display:block;">Return to index</a><?php
+} // endif $standalone
 
 function imgup() {
     global $user, $realisstaff, $metadata;
@@ -330,7 +340,7 @@ function newRegrade($qid) {
 }
 
 function showQuiz($qid, $blank = false) {
-    global $user, $metadata, $isstaff, $realisstaff;
+    global $user, $metadata, $isstaff, $realisstaff, $standalone;
     $qobj = qparse($qid);
     if (isset($qobj['error'])) { echo $qobj['error']; return; }
 
@@ -339,7 +349,7 @@ function showQuiz($qid, $blank = false) {
     $sobj = aparse($qobj, $user);
     if (!$sobj['may_view']) { echo "You may not view this quiz"; return; }
 
-    if ($isstaff && isset($_GET['showkey'])) {
+    if (!$standalone && $isstaff && isset($_GET['showkey'])) {
         $sobj['may_view_key'] = true;
         echo "<center class='count'>".count(glob("log/$qid/*.log"))." people have viewed this quiz</center>";
     }
@@ -394,7 +404,7 @@ function showQuiz($qid, $blank = false) {
     if ($isstaff && !$hist)
         echo "<div class='explanation'><a href='$_SERVER[REQUEST_URI]&showkey'>click here to preview key</a></div>";
     
-    if ($realisstaff) {
+    if ($realisstaff && !$standalone) {
         echo "<form action='$_SERVER[REQUEST_URI]' method='GET'><input type='text' list='students-list' name='asuser'/><datalist id='students-list'>";
         foreach(glob("log/$qobj[slug]/*.log") as $path) {
             $u = basename($path, ".log");
@@ -449,7 +459,7 @@ function handleArchive() {
 
 handleArchive();
 imgup();
-newRegrade($_GET['qid']);
+if (!$standalone) {newRegrade($_GET['qid']);}
 showQuiz($_GET['qid'], isset($_GET['view_only']));
 
 ?>
