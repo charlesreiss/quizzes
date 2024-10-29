@@ -1087,7 +1087,7 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
                     if ($q['type'] == 'checkbox') echo $opt['points'] > 0 ? '⊤ (correct)' : '';
                     else echo $metadata['detailed-partial'] 
                         ? fractionOf($opt['points']) 
-                        : ($opt['points'] == 1 ? '⊤ (correct)' : ($opt['points'] > 0 ? '½ (partial credit)' : ''));
+                        : ($opt['points'] == 1 ? '⊤ (correct)' : ($opt['points'] > 0 ? '(partial credit)' : ''));
                 }
                 echo "</div>";
             }
