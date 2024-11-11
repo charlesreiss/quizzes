@@ -1082,7 +1082,7 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
                     if ($q['type'] == 'checkbox') echo $opt['original-sign'] > 0 ? '⊤ (correct)' : '';
                     echo ' (gave credit for any answer)';
                 } else if (array_key_exists('radio-drop', $opt)) {
-                    echo ' (gave credit but not best answer)';
+                    echo ' (gave credit but not correct answer)';
                 } else {
                     if ($q['type'] == 'checkbox') echo $opt['points'] > 0 ? '⊤ (correct)' : '';
                     else echo $metadata['detailed-partial'] 
