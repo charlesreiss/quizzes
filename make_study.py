@@ -52,7 +52,6 @@ def run_quizzes(options, qids):
             'php',
             'quiz.php',
             'standalone=1',
-            'view_only=1',
             'qid={}'.format(qid),
         ] + options, env={'PHP_AUTH_USER': 'quiz_viewer_for_study_guide'}, encoding='UTF-8') 
         text = text.replace('<!DOCTYPE html>', '')
@@ -69,7 +68,7 @@ if __name__ == '__main__':
     if args.key:
         options = ['showkey=1']
     else:
-        options = []
+        options = ['view_only=1']
     header(args.title)
     run_quizzes(options, args.qids)
     footer()
