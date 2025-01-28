@@ -255,6 +255,7 @@ function qparse($qid,$abspath=FALSE) {
         $opt = False; $options = False; $q = False; $mq = False;
         $keys = array(); $options = array();
         $all = array();
+        $qindex = 0;
         
         $line = TRUE;
         while($line !== FALSE) {
@@ -474,6 +475,7 @@ function qparse($qid,$abspath=FALSE) {
             foreach($mq['q'] as &$q) {
                 $qn += 1;
                 $q['slug'] = substr(sha1("questions/$qid.md $qn"), 32);
+                $q['qindex'] = $qn;
                 if (isset($q['options'])) {
                     $an = 0;
                     foreach($q['options'] as &$opt) {

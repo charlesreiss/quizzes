@@ -439,6 +439,7 @@ if (isset($_GET['qid']) && !isset(($qobj = qparse($_GET['qid']))['error'])) {
     $questions = array();
     $mqs = array();
     foreach($qobj['q'] as $mq) foreach($mq['q'] as $q) {
+        $q['grading_label'] = $q['slug'] . ' (Q'.$q['qindex'].')';
         $questions[$q['slug']] = $q;
         $mqs[$q['slug']] = $mq;
     }
@@ -481,14 +482,14 @@ echo "<script>console.log(".json_encode(array_keys($rev)).")</script>";
             $done = count($rev["$slug-graded"]);
             $left = count($val);
             $of = $done + $left;
-            echo "<tr><td>rubric</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=rubric'>$slug</a></td><td";
+            echo "<tr><td>rubric</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=rubric'>$questions[$slug][grading_label]</a></td><td";
             if ($left == 0) echo ' class="submitted"';
             echo ">$done of $of";
             echo "</td><td>".$questions[$slug]['text']."</td></tr>\n";
         }
         foreach($rev as $slug=>$val) if (substr($slug,8) == '-answers') {
             $slug = substr($slug,0,8);
-            echo "<tr><td>blank</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=blank'>$slug</a></td><td";
+            echo "<tr><td>blank</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=blank'>".$questions[$slug]['grading_label']."</a></td><td";
             $total = count($val);
             $sheet = get_blanks($qobj['slug'], $questions[$slug]);
             $left = 0;
@@ -506,10 +507,10 @@ echo "<script>console.log(".json_encode(array_keys($rev)).")</script>";
             $num = count($val);
             if (!$num) continue;
             $slug = substr($slug,0,8);
-            echo "<tr><td>regrade</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>$slug</a></td><td>0 of $num</td><td>".$questions[$slug]['text']."</td></tr>\n";
+            echo "<tr><td>regrade</td><td><a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>".$questions[$slug]['grading_label']."</a></td><td>0 of $num</td><td>".$questions[$slug]['text']."</td></tr>\n";
         }
         foreach($rev as $slug=>$val) if (strlen($slug) == 8) {
-            echo "<tr><td>comment</td><td>$slug: <a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>all</a>";
+            echo "<tr><td>comment</td><td>".$questions[$slug]['grading_label'].": <a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment'>all</a>";
             echo " or <a href='?qid=$_GET[qid]&amp;slug=$slug&amp;kind=comment-random'>random one at a time</a>";
             echo "</td><td";
             $total = count($val);
