@@ -255,6 +255,7 @@ function qparse($qid,$abspath=FALSE) {
         $opt = False; $options = False; $q = False; $mq = False;
         $keys = array(); $options = array();
         $all = array();
+        $qindex = 0;
         
         $line = TRUE;
         while($line !== FALSE) {
@@ -474,6 +475,7 @@ function qparse($qid,$abspath=FALSE) {
             foreach($mq['q'] as &$q) {
                 $qn += 1;
                 $q['slug'] = substr(sha1("questions/$qid.md $qn"), 32);
+                $q['qindex'] = $qn;
                 if (isset($q['options'])) {
                     $an = 0;
                     foreach($q['options'] as &$opt) {
@@ -1082,12 +1084,12 @@ function showQuestion($q, $quizid, $qnum, $user, $comments=false, $seeabove=fals
                     if ($q['type'] == 'checkbox') echo $opt['original-sign'] > 0 ? '⊤ (correct)' : '';
                     echo ' (gave credit for any answer)';
                 } else if (array_key_exists('radio-drop', $opt)) {
-                    echo ' (gave credit but not best answer)';
+                    echo ' (gave credit but not correct answer)';
                 } else {
                     if ($q['type'] == 'checkbox') echo $opt['points'] > 0 ? '⊤ (correct)' : '';
                     else echo $metadata['detailed-partial'] 
                         ? fractionOf($opt['points']) 
-                        : ($opt['points'] == 1 ? '⊤ (correct)' : ($opt['points'] > 0 ? '½ (partial credit)' : ''));
+                        : ($opt['points'] == 1 ? '⊤ (correct)' : ($opt['points'] > 0 ? '(partial credit)' : ''));
                 }
                 echo "</div>";
             }

@@ -6,9 +6,9 @@ body { background:#ccc; padding-top:1em; }
 .directions { background: #eee; padding:1ex 1ex; margin:2ex;  }
 .multiquestion { background: #eee; border-radius:1ex; padding:0.7ex 0.7ex; }
 .multiquestion + .multiquestion { margin-top:1em; }
-.submitting { background: #fe7; }
-.submitted { background: #dfd; }
-.disconnected { background: #f55; }
+.submitting { background: #fe7; border: 1px dashed black; }
+.submitted { background: #dfd; border 1px solid transparent; }
+.disconnected { background: #f55; border: 5px dashed red; }
 textarea { background-color: inherit; }
 #clock { position:fixed; right:0px; top:0px; background:#ff7; padding-left:0.5ex; padding-bottom:0.5ex; border-bottom-left-radius:1ex; border-left: 1px solid black; border-bottom: 1px solid black;}
 .correct { background-color: #bfb; padding: 0ex 1ex; }
