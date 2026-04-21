@@ -23,7 +23,7 @@ if (!$standalone) {
     }
     ?>
     
-    <!--<link rel="stylesheet" href="katex/katex.min.css">
+    <link rel="stylesheet" href="katex/katex.min.css">
     <script type="text/javascript" src="katex/katex.min.js"></script>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
@@ -36,7 +36,7 @@ if (!$standalone) {
                     {throwOnError:false, displayMode:true})
             )
         });
-    </script>-->
+    </script>
 
     <script>
 <?php if (!isset($_GET['view_only'])) { ?>
