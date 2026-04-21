@@ -108,6 +108,7 @@ function post_grades($prefix, $special=array()) {
             //if ($user != 'lat7h') continue;
             if ($human === false ) {
                 file_put_contents_recursive("$dir$user/.grade", '{"kind":"percentage","ratio":0,"comments":"did not take '.$qname.'"}');
+            } else if (file_exists("$dir$user/.manualgrade")) {
             } else if (count($human) == 0) {
                 if (file_exists("$dir$user/.grade")) {
                     unlink("$dir$user/.grade");
